@@ -6,11 +6,14 @@
 #include "raymath.h"
 
 #include "camera.h"
-#include "input.h"
+#include "dynamic_array.h"
 #include "general.h"
+#include "input.h"
 
 void setup(game_t *game)
 {
+	camera_setup(&game->camera);
+
 	const float xyz_dist = 300;
 	da_append(&game->lines, ((line_t){
 		.start = {-xyz_dist, 0, 0},
@@ -54,32 +57,32 @@ void update_loop(game_t *game, const float delta_time)
 
 	Vector3 *sphere_center = &game->spheres.items[0].center;
 	*sphere_center = Vector3RotateByAxisAngle(*sphere_center, rotate_vec, radians);
+
+	da_for(&game->rays) {
+		const ray_t ray = game->rays.items[i];
+		if (ray.death_time <= GetTime()) {
+			da_remove(&game->rays, i);
+			if (i > 0) i--;
+		}
+	}
 }
 
-int main(void)
+void draw(const game_t game)
 {
-	Camera camera = {0};
-	camera_setup(&camera);
-	InitWindow(1280, 800, "Test fps");
+	BeginDrawing();
 
-	const float xyz_dist = 300;
+	BeginMode3D(game.camera);
 
-	DisableCursor();
-	SetTargetFPS(120);
-
-	game_t game = {0};
-	setup(&game);
-
-	while(!WindowShouldClose()) {
-		BeginDrawing();
-
-		BeginMode3D(camera);
-
+	{
 		ClearBackground(BLACK);
-
 		for (int i = 0; i < game.lines.size; i++) {
 			const line_t line = game.lines.items[i];
 			DrawLine3D(line.start, line.end, line.color);
+		}
+
+		for (int i = 0; i < game.rays.size; i++) {
+			const ray_t ray = game.rays.items[i];
+			DrawLine3D(ray.line.start, ray.line.end, ray.line.color);
 		}
 
 		for (int i = 0; i < game.cubes.size; i++) {
@@ -92,16 +95,33 @@ int main(void)
 			DrawSphere(sphere.center, sphere.radius, sphere.color);
 		}
 
-		EndMode3D();
+	}
 
-		EndDrawing();
+	EndMode3D();
+	EndDrawing();
+}
+
+int main(void)
+{
+	game_t game = {0};
+	setup(&game);
+
+	InitWindow(1280, 800, "Test fps");
+
+	const float xyz_dist = 300;
+
+	DisableCursor();
+	SetTargetFPS(120);
+
+	while(!WindowShouldClose()) {
+		draw(game);
 
 		const float delta_time = GetFrameTime();
 
 		update_loop(&game, delta_time);
 		if (IsWindowFocused()) {
-			input_mouse_handler(&camera, delta_time);
-			input_keyboard_handler(&camera, delta_time);
+			input_mouse_handler(&game, delta_time);
+			input_keyboard_handler(&game, delta_time);
 		}
 	}
 
