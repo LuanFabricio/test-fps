@@ -1,44 +1,13 @@
 #include <assert.h>
-#include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include "camera.h"
-#include "input.h"
 #include "raylib.h"
 #include "raymath.h"
 
-typedef struct {
-	Vector3 start, end;
-	Color color;
-} line_t;
-
-typedef struct {
-	struct {
-		line_t *items;
-		size_t size, capacity;
-	} lines;
-} game_t;
-
-const static Vector3 cube_position = (Vector3){0};
-
-const float dist = 0.5f;
-static Vector3 sphere_center = (Vector3){0, dist, 0};
-
-#define da_append(arr, x)\
-	do {\
-		if ((arr)->items == NULL || (arr)->capacity <= 0){\
-			free((arr)->items);\
-			(arr)->size = 0;\
-			(arr)->capacity = 5;\
-			(arr)->items = malloc(sizeof(x) * (arr)->capacity);\
-		} else if (((arr)->size + 1) >= (arr)->capacity) {\
-				(arr)->capacity *= 2;\
-				(arr)->items = realloc((arr)->items, sizeof(*(arr)->items) * (arr)->capacity);\
-		}\
-		(arr)->items[(arr)->size] = x;\
-		(arr)->size += 1;\
-	} while(0)
+#include "camera.h"
+#include "input.h"
+#include "general.h"
 
 void setup(game_t *game)
 {
@@ -58,15 +27,33 @@ void setup(game_t *game)
 		.end = {0, 0, xyz_dist},
 		.color = BLUE,
 	}));
+
+	da_append(&game->cubes, ((cube_t){
+		.center = {0},
+		.size = (Vector3){0.5f, 0.5f, 0.5f},
+		.color = YELLOW,
+	}));
+	da_append(&game->cubes, ((cube_t){
+		.center = {0, -10, 0},
+		.size = (Vector3){200.f, 5.f, 200.f},
+		.color = ColorBrightness(WHITE, -0.5f),
+	}));
+
+	da_append(&game->spheres, ((sphere_t){
+		.center = {0, 1, 0},
+		.radius = PI / 16.f,
+		.color = PURPLE,
+	}));
 }
 
-void update_loop(const float delta_time)
+void update_loop(game_t *game, const float delta_time)
 {
 	const float angle = 10 * delta_time;
 	const float radians = angle * DEG2RAD;
 	const Vector3 rotate_vec = {0.5f, 0, 0.5f};
 
-	sphere_center = Vector3RotateByAxisAngle(sphere_center, rotate_vec, radians);
+	Vector3 *sphere_center = &game->spheres.items[0].center;
+	*sphere_center = Vector3RotateByAxisAngle(*sphere_center, rotate_vec, radians);
 }
 
 int main(void)
@@ -80,24 +67,6 @@ int main(void)
 	DisableCursor();
 	SetTargetFPS(120);
 
-	line_t lines[] = {
-		{
-			.start = {-xyz_dist, 0, 0},
-			.end = {xyz_dist, 0, 0},
-			.color = RED,
-		},
-		{
-			.start = {0, -xyz_dist, 0},
-			.end = {0, xyz_dist, 0},
-			.color = GREEN,
-		},
-		{
-			.start = {0, 0, -xyz_dist},
-			.end = {0, 0, xyz_dist},
-			.color = BLUE,
-		}
-	};
-
 	game_t game = {0};
 	setup(&game);
 
@@ -107,16 +76,21 @@ int main(void)
 		BeginMode3D(camera);
 
 		ClearBackground(BLACK);
-		DrawCube(cube_position, 0.3f, 0.3f, 0.3f, YELLOW);
-
-		DrawSphere(sphere_center, PI / 16, PURPLE);
 
 		for (int i = 0; i < game.lines.size; i++) {
-			const line_t line = lines[i];
+			const line_t line = game.lines.items[i];
 			DrawLine3D(line.start, line.end, line.color);
 		}
 
-		DrawCube((Vector3){0, -10, 0}, 200, 5, 200, ColorBrightness(WHITE, -0.5f));
+		for (int i = 0; i < game.cubes.size; i++) {
+			const cube_t cube = game.cubes.items[i];
+			DrawCubeV(cube.center, cube.size, cube.color);
+		}
+
+		for (int i = 0; i < game.spheres.size; i++) {
+			const sphere_t sphere = game.spheres.items[i];
+			DrawSphere(sphere.center, sphere.radius, sphere.color);
+		}
 
 		EndMode3D();
 
@@ -124,7 +98,7 @@ int main(void)
 
 		const float delta_time = GetFrameTime();
 
-		update_loop(delta_time);
+		update_loop(&game, delta_time);
 		if (IsWindowFocused()) {
 			input_mouse_handler(&camera, delta_time);
 			input_keyboard_handler(&camera, delta_time);
