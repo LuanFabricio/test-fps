@@ -1,6 +1,6 @@
 #pragma once
 
-#include "raylib.h"
+#include "general.h"
 
-void input_keyboard_handler(Camera *camera, const float delta_time);
-void input_mouse_handler(Camera *camera, const float delta_time);
+void input_keyboard_handler(game_t *game, const float delta_time);
+void input_mouse_handler(game_t *game, const float delta_time);
