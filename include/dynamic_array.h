@@ -35,7 +35,7 @@
 		}\
 	} while(0)
 
-#define da_for(arr) for (size_t i = 0; i < (arr)->size; i++)
+#define da_for(arr, counter) for (size_t counter = 0; counter < (arr)->size; counter++)
 
 #define da_for_each(arr, type)\
 	for (\

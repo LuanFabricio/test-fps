@@ -12,6 +12,8 @@
 
 void setup(game_t *game)
 {
+	game->screen.width = GetScreenWidth();
+	game->screen.height = GetScreenHeight();
 	camera_setup(&game->camera);
 
 	const float xyz_dist = 300;
@@ -47,8 +49,21 @@ void setup(game_t *game)
 		.radius = PI / 16.f,
 		.color = PURPLE,
 	}));
-}
 
+	da_append(&game->objects, ((object_t){
+		.position = { 8, 8, 8 },
+		.size = { 8, 8, 8 },
+		.color = PURPLE,
+		.hitbox =  {
+			.box = {
+				.min = { 4, 4, 4 },
+				.max = { 12, 12, 12 },
+			},
+			.position = { 8, 8, 8 },
+			.size = { 8, 8, 8 },
+		},
+	}));
+}
 void update_loop(game_t *game, const float delta_time)
 {
 	const float angle = 10 * delta_time;
@@ -58,12 +73,29 @@ void update_loop(game_t *game, const float delta_time)
 	Vector3 *sphere_center = &game->spheres.items[0].center;
 	*sphere_center = Vector3RotateByAxisAngle(*sphere_center, rotate_vec, radians);
 
-	da_for(&game->rays) {
+	da_for(&game->rays, i) {
 		const ray_t ray = game->rays.items[i];
 		if (ray.death_time <= GetTime()) {
 			da_remove(&game->rays, i);
 			if (i > 0) i--;
 		}
+	}
+
+	da_for(&game->objects, i) {
+		const object_t obj = game->objects.items[i];
+		da_for(&game->rays, j) {
+			Ray ray = game->rays.items[j].ray;
+			RayCollision ray_col = GetRayCollisionBox(ray, obj.hitbox.box);
+
+			if (ray_col.hit) {
+				game->rays.items[j].line.color = RED;
+			}
+		}
+	}
+
+	if (IsWindowResized()) {
+		game->screen.width = GetScreenWidth();
+		game->screen.height = GetScreenHeight();
 	}
 }
 
@@ -95,9 +127,51 @@ void draw(const game_t game)
 			DrawSphere(sphere.center, sphere.radius, sphere.color);
 		}
 
+		for (int i = 0; i < game.objects.size; i++) {
+			const object_t object = game.objects.items[i];
+			DrawCubeV(object.position, object.size, object.color);
+			DrawCubeWiresV(object.hitbox.position, object.hitbox.size, GREEN);
+		}
+
 	}
 
 	EndMode3D();
+
+	DrawText(
+		TextFormat(
+			"x: %f / y: %f / z: %f",
+			game.camera.position.x,
+			game.camera.position.y,
+			game.camera.position.z),
+		32, 32, 32,
+		GREEN);
+	DrawText(
+		TextFormat(
+			"up: %f, %f, %f",
+			game.camera.up.x,
+			game.camera.up.y,
+			game.camera.up.z),
+		32, 64, 32,
+		GREEN);
+	const Vector3 forward = camera_get_forward(&game.camera);
+	DrawText(
+		TextFormat(
+			"forward: %f, %f, %f",
+			forward.x,
+			forward.y,
+			forward.z),
+		32, 96, 32,
+		GREEN);
+
+	const Vector2 mouse = GetMousePosition();
+	DrawText(
+		TextFormat(
+			"mouse: %f, %f",
+			mouse.x,
+			mouse.y),
+		32, 128, 32,
+		GREEN);
+
 	EndDrawing();
 }
 
