@@ -30,11 +30,17 @@ inline static Vector3 get_move_vector()
 	if (IsKeyUp(KEY_SPACE)) {
 		move_vector.y += -1;
 	}
-	if (IsKeyUp(KEY_LEFT_SHIFT)) {
+	if (IsKeyUp(KEY_LEFT_CONTROL)) {
 		move_vector.y += 1;
 	}
 
-	return Vector3Normalize(move_vector);
+	move_vector = Vector3Normalize(move_vector);
+
+	if (IsKeyDown(KEY_LEFT_SHIFT)) {
+		move_vector = Vector3Scale(move_vector, 4.5f);
+	}
+
+	return move_vector;
 }
 
 void input_keyboard_handler(game_t *game, const float delta_time)
