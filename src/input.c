@@ -27,11 +27,11 @@ inline static Vector3 get_move_vector()
 		move_vector.z += -1;
 	}
 
-	if (IsKeyUp(KEY_SPACE)) {
-		move_vector.y += -1;
-	}
-	if (IsKeyUp(KEY_LEFT_CONTROL)) {
+	if (IsKeyDown(KEY_SPACE)) {
 		move_vector.y += 1;
+	}
+	if (IsKeyDown(KEY_LEFT_CONTROL)) {
+		move_vector.y += -1;
 	}
 
 	move_vector = Vector3Normalize(move_vector);
