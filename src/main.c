@@ -1,7 +1,10 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <time.h>
 
+#include "object.h"
 #include "raylib.h"
 #include "raymath.h"
 
@@ -12,6 +15,8 @@
 
 void setup(game_t *game)
 {
+	srand(time(NULL));
+
 	game->screen.width = GetScreenWidth();
 	game->screen.height = GetScreenHeight();
 	camera_setup(&game->camera);
@@ -50,19 +55,14 @@ void setup(game_t *game)
 		.color = PURPLE,
 	}));
 
-	da_append(&game->objects, ((object_t){
-		.position = { 8, 8, 8 },
-		.size = { 8, 8, 8 },
-		.color = PURPLE,
-		.hitbox =  {
-			.box = {
-				.min = { 4, 4, 4 },
-				.max = { 12, 12, 12 },
-			},
-			.position = { 8, 8, 8 },
-			.size = { 8, 8, 8 },
-		},
-	}));
+	da_append(
+		&game->objects,
+		object_create(
+			.position = { 8, 8, 8},
+			.size = { 8, 8, 8},
+			.hitbox_position = { 8, 8, 8},
+			.hitbox_size = { 8, 8, 8},
+			.color = PURPLE));
 }
 void update_loop(game_t *game, const float delta_time)
 {
@@ -82,15 +82,24 @@ void update_loop(game_t *game, const float delta_time)
 	}
 
 	da_for(&game->objects, i) {
-		const object_t obj = game->objects.items[i];
+		object_t *obj = &game->objects.items[i];
 		da_for(&game->rays, j) {
 			Ray ray = game->rays.items[j].ray;
-			RayCollision ray_col = GetRayCollisionBox(ray, obj.hitbox.box);
+			RayCollision ray_col = GetRayCollisionBox(ray, obj->hitbox.box);
 
 			if (ray_col.hit) {
 				game->rays.items[j].line.color = RED;
 			}
 		}
+
+		const float speed = 1.5f;
+		const Vector3 move = Vector3Scale(
+			Vector3Normalize(
+				Vector3Subtract(
+					game->camera.position, obj->position)),
+			speed * delta_time
+		);
+		object_move_position(obj, move);
 	}
 
 	if (IsWindowResized()) {
