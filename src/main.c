@@ -186,10 +186,9 @@ void draw(const game_t game)
 
 int main(void)
 {
+	InitWindow(1280, 800, "Test fps");
 	game_t game = {0};
 	setup(&game);
-
-	InitWindow(1280, 800, "Test fps");
 
 	const float xyz_dist = 300;
 
