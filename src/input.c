@@ -60,20 +60,17 @@ void input_mouse_handler(game_t *game, const float delta_time)
 
 	const bool mouse_left_click = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 	if (mouse_left_click) {
-		const Vector2 aim_position = GetMousePosition();
-		// {
-		// 	.x = game->screen.width / 2.f,
-		// 	.y = game->screen.height / 2.f,
-		// };
-
-		Ray ray = GetScreenToWorldRay(aim_position, game->camera);
+		const Vector3 camera_forward = camera_get_forward(&game->camera);
 		da_append(&game->rays, ((ray_t){
 			.line = {
 				.color = WHITE,
-				.start = ray.position,
-				.end = Vector3Add(ray.position, Vector3Scale(ray.direction, 300)),
+				.start = game->camera.position,
+				.end = Vector3Add(game->camera.position, Vector3Scale(camera_forward, 300)),
 			},
-			.ray = ray,
+			.ray = {
+				.position = game->camera.position,
+				.direction = camera_forward,
+			},
 			.death_time = GetTime() + 10,
 		}));
 	}
