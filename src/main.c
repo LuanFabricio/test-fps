@@ -146,6 +146,12 @@ void draw(const game_t game)
 
 	EndMode3D();
 
+	DrawCircle(
+		game.screen.width / 2,
+		game.screen.height / 2,
+		2.5,
+		GREEN);
+
 	DrawText(
 		TextFormat(
 			"x: %f / y: %f / z: %f",
@@ -201,6 +207,7 @@ int main(void)
 		const float delta_time = GetFrameTime();
 
 		update_loop(&game, delta_time);
+
 		if (IsWindowFocused()) {
 			input_mouse_handler(&game, delta_time);
 			input_keyboard_handler(&game, delta_time);
