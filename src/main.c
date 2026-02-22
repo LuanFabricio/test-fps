@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -13,13 +14,22 @@
 #include "general.h"
 #include "input.h"
 
+float randf()
+{
+	return (float)rand() / RAND_MAX;
+}
+
 void setup(game_t *game)
 {
 	srand(time(NULL));
 
+	game->cooldown = 0.166;
+	game->delay_to_next_shoot = 0;
 	game->screen.width = GetScreenWidth();
 	game->screen.height = GetScreenHeight();
 	camera_setup(&game->camera);
+
+	game->models.cube = LoadModelFromMesh(GenMeshCube(1, 1, 1));
 
 	const float xyz_dist = 300;
 	da_append(&game->lines, ((line_t){
@@ -59,12 +69,13 @@ void setup(game_t *game)
 		&game->objects,
 		object_create(
 			.position = { 8, 8, 8},
-			.size = { 8, 8, 8},
+			.size = { 2, 2, 2},
 			.hitbox_position = { 8, 8, 8},
-			.hitbox_size = { 8, 8, 8},
+			.hitbox_size = { 2, 2, 2},
 			.color = PURPLE));
 }
-void update_loop(game_t *game, const float delta_time)
+
+static inline void update_loop(game_t *game, const float delta_time)
 {
 	const float angle = 10 * delta_time;
 	const float radians = angle * DEG2RAD;
@@ -89,9 +100,13 @@ void update_loop(game_t *game, const float delta_time)
 
 			if (ray_col.hit) {
 				game->rays.items[j].line.color = RED;
-			}
-		}
+				da_remove(&game->rays, j);
+				if (j > 0) j--;
 
+				obj->health -= 0.5f;
+			}
+
+		}
 		const float speed = 1.5f;
 		const Vector3 move = Vector3Scale(
 			Vector3Normalize(
@@ -100,15 +115,53 @@ void update_loop(game_t *game, const float delta_time)
 			speed * delta_time
 		);
 		object_move_position(obj, move);
+
+		if (obj->health <= 0.f) {
+			da_remove(&game->objects, i);
+			if (i > 0) i--;
+		}
 	}
 
 	if (IsWindowResized()) {
 		game->screen.width = GetScreenWidth();
 		game->screen.height = GetScreenHeight();
 	}
+
+	if (game->delay_to_next_shoot > 0) {
+		game->delay_to_next_shoot -= delta_time;
+	}
+
+	if (game->objects.size <= 5) {
+		const Vector3 position = {
+			.x = 30 - randf() * 15,
+			.y = 30 - randf() * 15,
+			.z = 30 - randf() * 15,
+		};
+		const Vector3 size = {
+			.x = 0.5f + randf() * 2,
+			.y = 0.5f + randf() * 2,
+			.z = 0.5f + randf() * 2,
+		};
+		da_append(
+			&game->objects,
+			object_create(
+				.position = position,
+				.size = size,
+				.hitbox_position = position,
+				.hitbox_size = size,
+				.color = (Color){
+					.r = randf() * 255,
+					.g = randf() * 255,
+					.b = randf() * 255,
+					.a = 255,
+				}
+			)
+		);
+		printf("game->objects.size = %lu\n", game->objects.size);
+	}
 }
 
-void draw(const game_t game)
+static inline void draw(const game_t game)
 {
 	BeginDrawing();
 
@@ -138,10 +191,32 @@ void draw(const game_t game)
 
 		for (int i = 0; i < game.objects.size; i++) {
 			const object_t object = game.objects.items[i];
-			DrawCubeV(object.position, object.size, object.color);
-			DrawCubeWiresV(object.hitbox.position, object.hitbox.size, GREEN);
+
+			DrawModelEx(
+				game.models.cube,
+				object.position,
+				(Vector3){0, 1, 0},
+				0,
+				object.size,
+				object.color);
+			DrawBoundingBox(object.hitbox.box, GREEN);
 		}
 
+
+		DrawModelEx(
+			game.models.cube,
+			Vector3Add(
+				Vector3Add(
+					Vector3Add(
+						game.camera.position,
+						camera_get_forward(&game.camera)),
+					Vector3Scale(camera_get_right(&game.camera), 0.75f)),
+				Vector3Scale(game.camera.up, -0.5f)
+			),
+			game.camera.up,
+			game.deg_rotation.x + 35.f,
+			(Vector3){0.25f, 0.25f, 0.25f},
+			GREEN);
 	}
 
 	EndMode3D();

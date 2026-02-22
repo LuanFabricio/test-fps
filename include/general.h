@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdlib.h>
+
 #include "raylib.h"
 
 #include "dynamic_array.h"
@@ -34,14 +36,21 @@ typedef struct {
 		BoundingBox box;
 		Vector3 position, size;
 	} hitbox;
+	float health;
 } object_t;
 
 typedef struct {
 	Camera camera;
+	Vector2 deg_rotation;
+	float cooldown, delay_to_next_shoot;
 
 	struct {
 		int width, height;
 	} screen;
+
+	struct {
+		Model cube;
+	} models;
 
 	da_create(line_t) lines;
 	da_create(sphere_t) spheres;

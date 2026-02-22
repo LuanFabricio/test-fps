@@ -12,7 +12,8 @@ object_t _object_create(object_create_params params)
 			.position = params.hitbox_position,
 			.size = params.hitbox_size,
 			.box = {0},
-		}
+		},
+		.health = 10.f,
 	};
 
 	const Vector3 hitbox_half_size = Vector3Scale(params.hitbox_size, 0.5f);

@@ -61,11 +61,17 @@ void input_mouse_handler(game_t *game, const float delta_time)
 	const float fixed_speed = MOUSE_SPEED * delta_time;
 
 	Camera *camera = &game->camera;
-	camera_rotate_x(camera, mouse_delta.x * fixed_speed);
-	camera_rotate_y(camera, mouse_delta.y * fixed_speed);
+	const float angle_x = mouse_delta.x * fixed_speed;
+	const float angle_y = mouse_delta.y * fixed_speed;
 
-	const bool mouse_left_click = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
-	if (mouse_left_click) {
+	game->deg_rotation.x += angle_x;
+	game->deg_rotation.y += angle_y;
+	camera_rotate_x(camera, angle_x);
+	camera_rotate_y(camera, angle_y);
+
+	const bool mouse_left_click = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
+	if (mouse_left_click && game->delay_to_next_shoot <= 0) {
+		game->delay_to_next_shoot = game->cooldown;
 		const Vector3 camera_forward = camera_get_forward(&game->camera);
 		da_append(&game->rays, ((ray_t){
 			.line = {
