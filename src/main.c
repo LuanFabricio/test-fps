@@ -227,39 +227,51 @@ static inline void draw(const game_t game)
 		2.5,
 		GREEN);
 
+	const int font_size = 24;
+	const int x = 16;
+	int y = 16;
+
+	DrawFPS(x, y);
+
+	y += font_size;
 	DrawText(
 		TextFormat(
 			"x: %f / y: %f / z: %f",
 			game.camera.position.x,
 			game.camera.position.y,
 			game.camera.position.z),
-		32, 32, 32,
+		x, y, font_size,
 		GREEN);
+
+	y += font_size;
 	DrawText(
 		TextFormat(
 			"up: %f, %f, %f",
 			game.camera.up.x,
 			game.camera.up.y,
 			game.camera.up.z),
-		32, 64, 32,
+		x, y, font_size,
 		GREEN);
+
 	const Vector3 forward = camera_get_forward(&game.camera);
+	y += font_size;
 	DrawText(
 		TextFormat(
 			"forward: %f, %f, %f",
 			forward.x,
 			forward.y,
 			forward.z),
-		32, 96, 32,
+		x, y, font_size,
 		GREEN);
 
 	const Vector2 mouse = GetMousePosition();
+	y += font_size;
 	DrawText(
 		TextFormat(
 			"mouse: %f, %f",
 			mouse.x,
 			mouse.y),
-		32, 128, 32,
+		x, y, font_size,
 		GREEN);
 
 	EndDrawing();
