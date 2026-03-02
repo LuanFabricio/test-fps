@@ -1,6 +1,6 @@
 CC 		:= cc
 C_INCLUDE 	:= -Iinclude
-C_FLAGS 	:=  -lraylib -lm -g
+C_FLAGS 	:=  -lraylib -lm -g -Wall -Wextra
 
 BUILD_DIR 	:= bin
 BIN_PATH 	:= $(BUILD_DIR)/main
