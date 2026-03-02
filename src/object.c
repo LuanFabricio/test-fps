@@ -1,3 +1,4 @@
+#include "general.h"
 #include "raymath.h"
 
 #include "object.h"
@@ -11,10 +12,15 @@ object_t _object_create(object_create_params params)
 		.hitbox = {
 			.position = params.hitbox_position,
 			.size = params.hitbox_size,
-			.box = {0},
+			.box = {{0}},
 		},
-		.health = 10.f,
+		.attributes = {
+			.max_health = 10 + randf() * 100,
+			0
+		},
 	};
+
+	obj.attributes.current_health = obj.attributes.max_health;
 
 	const Vector3 hitbox_half_size = Vector3Scale(params.hitbox_size, 0.5f);
 	obj.hitbox.box.min = Vector3Subtract(obj.hitbox.position, hitbox_half_size);
