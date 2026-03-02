@@ -94,19 +94,6 @@ static inline void update_loop(game_t *game, const float delta_time)
 
 	da_for(&game->objects, i) {
 		object_t *obj = &game->objects.items[i];
-		da_for(&game->rays, j) {
-			Ray ray = game->rays.items[j].ray;
-			RayCollision ray_col = GetRayCollisionBox(ray, obj->hitbox.box);
-
-			if (ray_col.hit) {
-				game->rays.items[j].line.color = RED;
-				da_remove(&game->rays, j);
-				if (j > 0) j--;
-
-				obj->health -= 0.5f;
-			}
-
-		}
 		const float speed = 1.5f;
 		const Vector3 move = Vector3Scale(
 			Vector3Normalize(
@@ -115,11 +102,6 @@ static inline void update_loop(game_t *game, const float delta_time)
 			speed * delta_time
 		);
 		object_move_position(obj, move);
-
-		if (obj->health <= 0.f) {
-			da_remove(&game->objects, i);
-			if (i > 0) i--;
-		}
 	}
 
 	if (IsWindowResized()) {

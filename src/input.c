@@ -73,17 +73,29 @@ void input_mouse_handler(game_t *game, const float delta_time)
 	if (mouse_left_click && game->delay_to_next_shoot <= 0) {
 		game->delay_to_next_shoot = game->cooldown;
 		const Vector3 camera_forward = camera_get_forward(&game->camera);
-		da_append(&game->rays, ((ray_t){
-			.line = {
-				.color = WHITE,
-				.start = game->camera.position,
-				.end = Vector3Add(game->camera.position, Vector3Scale(camera_forward, 300)),
-			},
-			.ray = {
-				.position = game->camera.position,
-				.direction = camera_forward,
-			},
-			.death_time = GetTime() + 10,
-		}));
+
+		Ray ray = {
+			.position = game->camera.position,
+			.direction = camera_forward,
+		};
+
+		// TODO: Move to a specific module
+		da_for(&game->objects, i) {
+			object_t *obj = &game->objects.items[i];
+			RayCollision ray_col = GetRayCollisionBox(ray, obj->hitbox.box);
+
+			if (ray_col.hit) {
+				obj->attributes.current_health -= game->player.attributes.damage;
+			}
+
+			if (obj->attributes.current_health <= 0) {
+				player_info_gain_xp(
+					&game->player,
+					obj->attributes.max_health + randf() * 100);
+
+				da_remove(&game->objects, i);
+				if (i > 0) i--;
+			}
+		}
 	}
 }
