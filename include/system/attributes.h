@@ -3,10 +3,12 @@
 #include <stdint.h>
 
 typedef enum {
-	ATTRIBUTE_HEALTH,
+	ATTRIBUTE_HEALTH = 0,
 	ATTRIBUTE_ARMOR,
 	ATTRIBUTE_DAMAGE,
 	ATTRIBUTE_ELEMENTAL_MULTIPLIER,
+
+	ATTRIBUTE_LEN,
 } attributes_e;
 
 typedef struct {
