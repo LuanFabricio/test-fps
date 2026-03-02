@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include "object.h"
@@ -13,15 +14,13 @@
 #include "dynamic_array.h"
 #include "general.h"
 #include "input.h"
-
-float randf()
-{
-	return (float)rand() / RAND_MAX;
-}
+#include "system/attributes.h"
 
 void setup(game_t *game)
 {
 	srand(time(NULL));
+
+	game->player.attributes.damage = 15.f;
 
 	game->cooldown = 0.166;
 	game->delay_to_next_shoot = 0;
@@ -141,6 +140,11 @@ static inline void update_loop(game_t *game, const float delta_time)
 		);
 		printf("game->objects.size = %lu\n", game->objects.size);
 	}
+
+	while (game->player.attribute_points > 0) {
+		player_info_spend_skill_upgrade(
+			&game->player, rand() % ATTRIBUTE_LEN);
+	}
 }
 
 static inline void draw(const game_t game)
@@ -151,27 +155,27 @@ static inline void draw(const game_t game)
 
 	{
 		ClearBackground(BLACK);
-		for (int i = 0; i < game.lines.size; i++) {
+		for (size_t i = 0; i < game.lines.size; i++) {
 			const line_t line = game.lines.items[i];
 			DrawLine3D(line.start, line.end, line.color);
 		}
 
-		for (int i = 0; i < game.rays.size; i++) {
+		for (size_t i = 0; i < game.rays.size; i++) {
 			const ray_t ray = game.rays.items[i];
 			DrawLine3D(ray.line.start, ray.line.end, ray.line.color);
 		}
 
-		for (int i = 0; i < game.cubes.size; i++) {
+		for (size_t i = 0; i < game.cubes.size; i++) {
 			const cube_t cube = game.cubes.items[i];
 			DrawCubeV(cube.center, cube.size, cube.color);
 		}
 
-		for (int i = 0; i < game.spheres.size; i++) {
+		for (size_t i = 0; i < game.spheres.size; i++) {
 			const sphere_t sphere = game.spheres.items[i];
 			DrawSphere(sphere.center, sphere.radius, sphere.color);
 		}
 
-		for (int i = 0; i < game.objects.size; i++) {
+		for (size_t i = 0; i < game.objects.size; i++) {
 			const object_t object = game.objects.items[i];
 
 			DrawModelEx(
@@ -183,7 +187,6 @@ static inline void draw(const game_t game)
 				object.color);
 			DrawBoundingBox(object.hitbox.box, GREEN);
 		}
-
 
 		DrawModelEx(
 			game.models.cube,
@@ -256,6 +259,9 @@ static inline void draw(const game_t game)
 		x, y, font_size,
 		GREEN);
 
+
+	render_player_info(&game.player, (Vector2){ game.screen.width - 255, 16 });
+
 	EndDrawing();
 }
 
@@ -264,8 +270,6 @@ int main(void)
 	InitWindow(1280, 800, "Test fps");
 	game_t game = {0};
 	setup(&game);
-
-	const float xyz_dist = 300;
 
 	DisableCursor();
 	SetTargetFPS(120);

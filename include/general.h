@@ -1,10 +1,10 @@
 #pragma once
 
-#include <stdlib.h>
-
 #include "raylib.h"
 
 #include "dynamic_array.h"
+#include "render/render.h"
+#include "system/attributes.h"
 
 typedef struct {
 	Vector3 start, end;
@@ -36,7 +36,7 @@ typedef struct {
 		BoundingBox box;
 		Vector3 position, size;
 	} hitbox;
-	float health;
+	attributes_t attributes;
 } object_t;
 
 typedef struct {
@@ -48,6 +48,8 @@ typedef struct {
 		int width, height;
 	} screen;
 
+	player_info_t player;
+
 	struct {
 		Model cube;
 	} models;
@@ -58,3 +60,5 @@ typedef struct {
 	da_create(ray_t) rays;
 	da_create(object_t) objects;
 } game_t;
+
+float randf();
