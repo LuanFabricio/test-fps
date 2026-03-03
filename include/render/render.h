@@ -4,3 +4,4 @@
 #include "system/player_info.h"
 
 void render_player_info(const player_info_t* info, const Vector2 position);
+void render_player_info_ui(const player_info_t* info, const Vector2 screen_size);

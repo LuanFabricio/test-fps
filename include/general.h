@@ -41,6 +41,9 @@ typedef struct {
 
 typedef struct {
 	Camera camera;
+
+	bool show_upgrades;
+
 	Vector2 deg_rotation;
 	float cooldown, delay_to_next_shoot;
 

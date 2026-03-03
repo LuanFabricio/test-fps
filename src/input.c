@@ -53,10 +53,21 @@ void input_keyboard_handler(game_t *game, const float delta_time)
 	camera_move_right(camera, move_vector.x);
 	camera_move_up(camera, move_vector.y);
 	camera_move_forward(camera, move_vector.z);
+
+	if (IsKeyPressed(KEY_I)) {
+		game->show_upgrades = !game->show_upgrades;
+		if (IsCursorHidden()) {
+			EnableCursor();
+		} else {
+			DisableCursor();
+		}
+	}
 }
 
 void input_mouse_handler(game_t *game, const float delta_time)
 {
+	if (game->show_upgrades) return;
+
 	const Vector2 mouse_delta = GetMouseDelta();
 	const float fixed_speed = MOUSE_SPEED * delta_time;
 

@@ -14,6 +14,7 @@
 #include "dynamic_array.h"
 #include "general.h"
 #include "input.h"
+#include "render/render.h"
 #include "system/attributes.h"
 
 void setup(game_t *game)
@@ -48,8 +49,7 @@ void setup(game_t *game)
 	}));
 
 	da_append(&game->cubes, ((cube_t){
-		.center = {0},
-		.size = (Vector3){0.5f, 0.5f, 0.5f},
+		.center = {0}, .size = (Vector3){0.5f, 0.5f, 0.5f},
 		.color = YELLOW,
 	}));
 	da_append(&game->cubes, ((cube_t){
@@ -261,6 +261,12 @@ static inline void draw(const game_t game)
 
 
 	render_player_info(&game.player, (Vector2){ game.screen.width - 255, 16 });
+
+	if (game.show_upgrades) {
+		render_player_info_ui(
+			&game.player,
+			(Vector2){.x = game.screen.width, .y = game.screen.height });
+	}
 
 	EndDrawing();
 }
