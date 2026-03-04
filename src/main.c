@@ -16,6 +16,7 @@
 #include "input.h"
 #include "render/render.h"
 #include "system/attributes.h"
+#include "ui/ui.h"
 
 void setup(game_t *game)
 {
@@ -145,6 +146,11 @@ static inline void update_loop(game_t *game, const float delta_time)
 		player_info_spend_skill_upgrade(
 			&game->player, rand() % ATTRIBUTE_LEN);
 	}
+
+
+	if (game->show_upgrades) {
+		ui_player_info_update();
+	}
 }
 
 static inline void draw(const game_t game)
@@ -263,9 +269,10 @@ static inline void draw(const game_t game)
 	render_player_info(&game.player, (Vector2){ game.screen.width - 255, 16 });
 
 	if (game.show_upgrades) {
-		render_player_info_ui(
-			&game.player,
-			(Vector2){.x = game.screen.width, .y = game.screen.height });
+		ui_player_info_render();
+		// render_player_info_ui(
+		// 	&game.player,
+		// 	(Vector2){.x = game.screen.width, .y = game.screen.height });
 	}
 
 	EndDrawing();
@@ -276,6 +283,8 @@ int main(void)
 	InitWindow(1280, 800, "Test fps");
 	game_t game = {0};
 	setup(&game);
+
+	ui_player_info_setup(GetScreenWidth(), GetScreenHeight());
 
 	DisableCursor();
 	SetTargetFPS(120);
