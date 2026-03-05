@@ -1,3 +1,5 @@
+#pragma once
+
 #include "attributes.h"
 
 typedef struct {
