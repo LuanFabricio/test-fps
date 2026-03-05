@@ -6,6 +6,9 @@
 #include "system/player_info.h"
 
 typedef struct {
+	// TODO: Remove this callback, maybe will be better
+	// if the module handles the on_over_event as an
+	// inner step in the _update function
 	void (*on_mouse_over_cb)(void*);
 	void (*on_mouse_click_cb)(void*);
 	void (*on_render_cb)(void*);
