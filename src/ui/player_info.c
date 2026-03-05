@@ -6,11 +6,18 @@
 #include <sys/select.h>
 
 #include "dynamic_array.h"
+#include "system/attributes.h"
+#include "system/player_info.h"
 #include "ui/ui.h"
 
 #define MAX_VALUE_FORMAT 999999999.f
 #define TEXT_BUFFER_SIZE 0xff
 #define FONT_SIZE 24
+
+struct player_upgrade_bundle {
+	player_info_t* info;
+	attributes_e attribute;
+};
 
 static void on_mouse_over_cb(void* ptr);
 static void on_mouse_click_cb(void* ptr);
@@ -59,14 +66,17 @@ void ui_player_info_setup(const int screen_width, int screen_height)
 	const int max_width = base_size.x + btn_size + 2 * padding;
 	const int max_height = (base_size.y + padding) * items_to_show + padding;
 	const int rect_width = max_width + padding;
+	const int rect_height = max_height + padding;
 
 	Vector2 current_size;
 	int idx = 0;
 	int x, y;
 
 	x = initial_x - rect_width / 2.f;
-	y = initial_y;
+	y = initial_y - rect_height / 2.f;
 
+	// TODO: Create an internal function to append a
+	// template and a button, passing out the attributes_e
 	append_format_text("HP: %.02f/%.02f");
 	append_format_text("ARMR: %.4f");
 	append_format_text("DMG: %.4f");
@@ -88,17 +98,19 @@ void ui_player_info_setup(const int screen_width, int screen_height)
 			.interactable = {
 				.on_mouse_over_cb = &on_mouse_over_cb,
 				.on_mouse_click_cb = &on_mouse_click_cb,
-			}
+			},
+			.data = malloc(sizeof(attributes_e)),
 		}));
 
 		button_t *last_btn = &player_ui.buttons.items[loop.i];
+		*(int*)last_btn->data = loop.i;
 		last_btn->text.x = last_btn->x + last_btn->width  / 4;
 		last_btn->text.y = last_btn->y;
 	}
 
 	player_ui.bg_rec = (Rectangle) {
-		.x = (initial_x - padding) - max_width / 2.f,
-		.y = (initial_y - padding),
+		.x = (initial_x - padding) - max_width  / 2.f,
+		.y = (initial_y - padding) - max_height / 2.f,
 		.width = rect_width,
 		.height = max_height,
 	};
@@ -108,7 +120,6 @@ void ui_player_info_render()
 {
 	DrawRectangleRec(player_ui.bg_rec, player_ui.bg_color);
 
-	char buffer[TEXT_BUFFER_SIZE];
 	da_for_each(&player_ui.texts, text_t) {
 		// TODO: Write a callback to update a buffer and display
 		// the attributes on DrawText
@@ -148,10 +159,10 @@ void ui_player_info_render()
 	}
 }
 
-void ui_player_info_update()
+void ui_player_info_update(player_info_t* info)
 {
 	const Vector2 mouse_position = GetMousePosition();
-	const bool is_clicked = IsKeyPressed(MOUSE_BUTTON_LEFT);
+	const bool is_clicked = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
 	da_for_each(&player_ui.buttons, button_t) {
 		Rectangle box = {
@@ -162,15 +173,27 @@ void ui_player_info_update()
 		};
 
 
-		if (CheckCollisionPointRec(mouse_position, box)) {
+		const bool mouse_collide = CheckCollisionPointRec(mouse_position, box);
+		if (mouse_collide) {
 			if (loop.item->interactable.on_mouse_over_cb) {
 				loop.item->interactable.on_mouse_over_cb(loop.item);
+			}
+
+			if (is_clicked && loop.item->interactable.on_mouse_click_cb) {
+				struct player_upgrade_bundle bundle = {
+					.info = info,
+					.attribute = *(attributes_e*)loop.item->data,
+				};
+				loop.item->interactable.on_mouse_click_cb(&bundle);
 			}
 		} else {
 			loop.item->selected = false;
 		}
 	}
 }
+
+// TODO: Implement an ui_player_info_update_position
+// function and move the UI item placement to it
 
 static void on_mouse_over_cb(void* ptr)
 {
@@ -180,4 +203,6 @@ static void on_mouse_over_cb(void* ptr)
 
 static void on_mouse_click_cb(void* ptr)
 {
+	struct player_upgrade_bundle* bundle = (struct player_upgrade_bundle*)ptr;
+	player_info_spend_skill_upgrade(bundle->info, bundle->attribute);
 }

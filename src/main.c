@@ -142,14 +142,14 @@ static inline void update_loop(game_t *game, const float delta_time)
 		printf("game->objects.size = %lu\n", game->objects.size);
 	}
 
-	while (game->player.attribute_points > 0) {
-		player_info_spend_skill_upgrade(
-			&game->player, rand() % ATTRIBUTE_LEN);
-	}
+	// while (game->player.attribute_points > 0) {
+	// 	player_info_spend_skill_upgrade(
+	// 		&game->player, rand() % ATTRIBUTE_LEN);
+	// }
 
 
 	if (game->show_upgrades) {
-		ui_player_info_update();
+		ui_player_info_update(&game->player);
 	}
 }
 

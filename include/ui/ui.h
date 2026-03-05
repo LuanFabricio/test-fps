@@ -3,6 +3,7 @@
 #include "raylib.h"
 
 #include "dynamic_array.h"
+#include "system/player_info.h"
 
 typedef struct {
 	void (*on_mouse_over_cb)(void*);
@@ -29,6 +30,8 @@ typedef struct {
 	interactable_t interactable;
 
 	bool selected;
+
+	void* data;
 } button_t;
 
 typedef struct {
@@ -42,4 +45,4 @@ typedef struct {
 
 void ui_player_info_setup(const int screen_width, int screen_height);
 void ui_player_info_render();
-void ui_player_info_update();
+void ui_player_info_update(player_info_t* info);
