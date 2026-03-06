@@ -269,7 +269,7 @@ static inline void draw(const game_t game)
 	render_player_info(&game.player, (Vector2){ game.screen.width - 255, 16 });
 
 	if (game.show_upgrades) {
-		ui_player_info_render();
+		ui_player_info_render(&game.player);
 		// render_player_info_ui(
 		// 	&game.player,
 		// 	(Vector2){.x = game.screen.width, .y = game.screen.height });

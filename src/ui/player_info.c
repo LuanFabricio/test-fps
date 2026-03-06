@@ -5,6 +5,7 @@
 #include <raylib.h>
 #include <sys/select.h>
 
+#include "macros/utils.h"
 #include "dynamic_array.h"
 #include "system/attributes.h"
 #include "system/player_info.h"
@@ -21,6 +22,7 @@ struct player_upgrade_bundle {
 
 static void on_mouse_over_cb(void* ptr);
 static void on_mouse_click_cb(void* ptr);
+static void attribute_text_format(const attributes_t* attr, const char* format, attributes_e attribute, char buffer[TEXT_BUFFER_SIZE]);
 
 static ui_t player_ui =  {
 	.bg_color = GREEN,
@@ -117,15 +119,20 @@ void ui_player_info_setup(const int screen_width, int screen_height)
 	};
 }
 
-void ui_player_info_render()
+void ui_player_info_render(const player_info_t* info)
 {
 	DrawRectangleRec(player_ui.bg_rec, player_ui.bg_color);
 
+	char buffer[TEXT_BUFFER_SIZE];
+
 	da_for_each(&player_ui.texts, text_t) {
-		// TODO: Write a callback to update a buffer and display
-		// the attributes on DrawText
-		DrawText(
+		attribute_text_format(
+			&info->attributes,
 			loop.item->content,
+			*(attributes_e*)loop.item->data,
+			buffer);
+		DrawText(
+			buffer,
 			loop.item->x,
 			loop.item->y,
 			FONT_SIZE,
@@ -206,4 +213,37 @@ static void on_mouse_click_cb(void* ptr)
 {
 	struct player_upgrade_bundle* bundle = (struct player_upgrade_bundle*)ptr;
 	player_info_spend_skill_upgrade(bundle->info, bundle->attribute);
+}
+
+
+static void attribute_text_format(
+	const attributes_t* attr,
+	const char* format,
+	const attributes_e attribute,
+	char buffer[TEXT_BUFFER_SIZE])
+{
+
+	switch (attribute) {
+		case ATTRIBUTE_HEALTH:
+			snprintf(
+				buffer, TEXT_BUFFER_SIZE,
+				format, attr->current_health, attr->max_health);
+			break;
+		case ATTRIBUTE_ARMOR:
+			snprintf(
+				buffer, TEXT_BUFFER_SIZE,
+				format, attr->armor);
+			break;
+		case ATTRIBUTE_DAMAGE:
+			snprintf(
+				buffer, TEXT_BUFFER_SIZE,
+				format, attr->damage);
+			break;
+		case ATTRIBUTE_ELEMENTAL_MULTIPLIER:
+			snprintf(
+				buffer, TEXT_BUFFER_SIZE,
+				format, attr->elemental_multiplier);
+			break;
+		default: UNREACHABLE("Attribute not mapped");
+	}
 }
