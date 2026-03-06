@@ -4,6 +4,7 @@
 
 #include "dynamic_array.h"
 #include "system/player_info.h"
+#include <stdint.h>
 
 typedef struct {
 	// TODO: Remove this callback, maybe will be better
@@ -20,6 +21,8 @@ typedef struct {
 
 	Color color;
 	interactable_t interactable;
+
+	uint8_t data[8];
 } text_t;
 
 typedef struct {
@@ -47,5 +50,5 @@ typedef struct {
 
 
 void ui_player_info_setup(const int screen_width, int screen_height);
-void ui_player_info_render();
+void ui_player_info_render(const player_info_t* info);
 void ui_player_info_update(player_info_t* info);
