@@ -288,6 +288,7 @@ int main(void)
 
 	DisableCursor();
 	SetTargetFPS(120);
+	SetExitKey(KEY_NULL);
 
 	while(!WindowShouldClose()) {
 		draw(game);

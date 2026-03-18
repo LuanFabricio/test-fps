@@ -9,6 +9,8 @@
 #define CAMERA_SPEED 1.5f
 #define MOUSE_SPEED -5.f
 
+#define GAME_KEY_INVENTORY KEY_ESCAPE
+
 inline static Vector3 get_move_vector()
 {
 	Vector3 move_vector = {0};
@@ -54,7 +56,7 @@ void input_keyboard_handler(game_t *game, const float delta_time)
 	camera_move_up(camera, move_vector.y);
 	camera_move_forward(camera, move_vector.z);
 
-	if (IsKeyPressed(KEY_I)) {
+	if (IsKeyPressed(GAME_KEY_INVENTORY)) {
 		game->show_upgrades = !game->show_upgrades;
 		if (IsCursorHidden()) {
 			EnableCursor();
