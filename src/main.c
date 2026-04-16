@@ -77,6 +77,15 @@ void setup(game_t *game)
 
 static inline void update_loop(game_t *game, const float delta_time)
 {
+	if (IsWindowResized()) {
+		printf("Window resized!\n");
+		game->screen.width = GetScreenWidth();
+		game->screen.height = GetScreenHeight();
+
+		ui_player_info_update_position(game->screen.width, game->screen.height);
+	}
+	if (game->on_pause) return;
+
 	const float angle = 10 * delta_time;
 	const float radians = angle * DEG2RAD;
 	const Vector3 rotate_vec = {0.5f, 0, 0.5f};
@@ -102,13 +111,6 @@ static inline void update_loop(game_t *game, const float delta_time)
 			speed * delta_time
 		);
 		object_move_position(obj, move);
-	}
-
-	if (IsWindowResized()) {
-		game->screen.width = GetScreenWidth();
-		game->screen.height = GetScreenHeight();
-
-		ui_player_info_update_position(game->screen.width, game->screen.height);
 	}
 
 	if (game->delay_to_next_shoot > 0) {

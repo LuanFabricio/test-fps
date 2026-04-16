@@ -5,6 +5,7 @@
 #include "dynamic_array.h"
 #include "render/render.h"
 #include "system/attributes.h"
+#include <stdbool.h>
 
 typedef struct {
 	Vector3 start, end;
@@ -62,6 +63,8 @@ typedef struct {
 	da_create(cube_t) cubes;
 	da_create(ray_t) rays;
 	da_create(object_t) objects;
+
+	bool on_pause;
 } game_t;
 
 float randf();

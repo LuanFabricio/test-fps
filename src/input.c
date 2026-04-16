@@ -3,6 +3,7 @@
 
 #include "camera.h"
 #include <raylib.h>
+#include <stdbool.h>
 
 #include "input.h"
 
@@ -10,6 +11,9 @@
 #define MOUSE_SPEED -5.f
 
 #define GAME_KEY_INVENTORY KEY_ESCAPE
+#define GAME_KEY_PAUSE KEY_P
+
+static bool last_frame_resized = true;
 
 inline static Vector3 get_move_vector()
 {
@@ -63,12 +67,19 @@ void input_keyboard_handler(game_t *game, const float delta_time)
 		} else {
 			DisableCursor();
 		}
+	} else if (IsKeyPressed(GAME_KEY_PAUSE)) {
+		game->on_pause = !game->on_pause;
 	}
 }
 
 void input_mouse_handler(game_t *game, const float delta_time)
 {
 	if (game->show_upgrades) return;
+	if (last_frame_resized) {
+		last_frame_resized = false;
+		return;
+	}
+	last_frame_resized = IsWindowResized();
 
 	const Vector2 mouse_delta = GetMouseDelta();
 	const float fixed_speed = MOUSE_SPEED * delta_time;
