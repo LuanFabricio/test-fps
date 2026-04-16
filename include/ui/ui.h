@@ -52,3 +52,4 @@ typedef struct {
 void ui_player_info_setup(const int screen_width, int screen_height);
 void ui_player_info_render(const player_info_t* info);
 void ui_player_info_update(player_info_t* info);
+void ui_player_info_update_position(const int screen_width, const int screen_height);

@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include <raylib.h>
+#include <raymath.h>
 #include <sys/select.h>
 
 #include "macros/utils.h"
@@ -14,6 +15,8 @@
 #define MAX_VALUE_FORMAT 999999999.f
 #define TEXT_BUFFER_SIZE 0xff
 #define FONT_SIZE 24
+
+const int padding = 8;
 
 struct player_upgrade_bundle {
 	player_info_t* info;
@@ -54,7 +57,6 @@ void ui_player_info_setup(const int screen_width, int screen_height)
 	font = GetFontDefault();
 
 	const int font_spacing = FONT_SIZE / font.baseSize;
-	const int padding = 8;
 
 	const int initial_x = screen_width  / 2.f + padding;
 	const int initial_y = screen_height / 2.f + padding;
@@ -200,8 +202,35 @@ void ui_player_info_update(player_info_t* info)
 	}
 }
 
-// TODO: Implement an ui_player_info_update_position
-// function and move the UI item placement to it
+void ui_player_info_update_position(const int screen_width, const int screen_height) {
+	const Vector2 original_position = {
+		.x = player_ui.bg_rec.x,
+		.y = player_ui.bg_rec.y,
+	};
+
+
+	const Vector2 new_position = {
+		.x = (screen_width - padding - player_ui.bg_rec.width)  / 2.f,
+		.y = (screen_height - padding - player_ui.bg_rec.height) / 2.f,
+	};
+
+	const Vector2 delta_pos = Vector2Subtract(new_position, original_position);
+
+	player_ui.bg_rec.x = new_position.x;
+	player_ui.bg_rec.y = new_position.y;
+
+	da_for_each(&player_ui.buttons, button_t) {
+		loop.item->x += delta_pos.x;
+		loop.item->y += delta_pos.y;
+		loop.item->text.x += delta_pos.x;
+		loop.item->text.y += delta_pos.y;
+	}
+
+	da_for_each(&player_ui.texts, text_t) {
+		loop.item->x += delta_pos.x;
+		loop.item->y += delta_pos.y;
+	}
+}
 
 static void on_mouse_over_cb(void* ptr)
 {

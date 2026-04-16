@@ -107,6 +107,8 @@ static inline void update_loop(game_t *game, const float delta_time)
 	if (IsWindowResized()) {
 		game->screen.width = GetScreenWidth();
 		game->screen.height = GetScreenHeight();
+
+		ui_player_info_update_position(game->screen.width, game->screen.height);
 	}
 
 	if (game->delay_to_next_shoot > 0) {
