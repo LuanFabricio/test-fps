@@ -10,11 +10,6 @@
 #include "system/player_info.h"
 
 typedef struct {
-	Vector3 center, size;
-	Color color;
-} cube_t;
-
-typedef struct {
 	line_t line;
 	Ray ray;
 	double death_time;
@@ -59,6 +54,8 @@ typedef struct {
 	da_create(Color) rays_colors;
 
 	da_create(cube_t) cubes;
+	da_create(Color) cubes_colors;
+
 	da_create(object_t) objects;
 
 	bool on_pause;

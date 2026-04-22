@@ -55,22 +55,25 @@ void setup(game_t *game)
 	};
 	game_add_lines(game, z_line, BLUE);
 
-	da_append(&game->cubes, ((cube_t){
-		.center = {0}, .size = (Vector3){0.5f, 0.5f, 0.5f},
-		.color = YELLOW,
-	}));
-	da_append(&game->cubes, ((cube_t){
-		.center = {0, -10, 0},
-		.size = (Vector3){200.f, 5.f, 200.f},
-		.color = ColorBrightness(WHITE, -0.5f),
-	}));
+	const cube_t cube1 = {
+		.center = {0},
+		.size = {0.5f, 0.5f, 0.5f},
+	};
+	game_add_cubes(game, cube1, YELLOW);
 
+	const cube_t cube2 = {
+		.center = {0, -10, 0},
+		.size = {200.f, 5.f, 200.f},
+	};
+	game_add_cubes(game, cube2, ColorBrightness(WHITE, -0.5f));
+
+	const sphere_t sphere = {
+		.center = {0, 1, 0},
+		.radius = PI / 16.f,
+	};
 	game_add_sphere(
 		game,
-		(sphere_t){
-			.center = {0, 1, 0},
-			.radius = PI / 16.f,
-		},
+		sphere,
 		PURPLE
 	);
 
@@ -188,7 +191,8 @@ static inline void draw(const game_t game)
 
 		for (size_t i = 0; i < game.cubes.size; i++) {
 			const cube_t cube = game.cubes.items[i];
-			DrawCubeV(cube.center, cube.size, cube.color);
+			const Color color = game.cubes_colors.items[i];
+			DrawCubeV(cube.center, cube.size, color);
 		}
 
 		for (size_t i = 0; i < game.spheres.size; i++) {

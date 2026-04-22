@@ -10,3 +10,7 @@ typedef struct {
 typedef struct {
 	Vector3 start, end;
 } line_t;
+
+typedef struct {
+	Vector3 center, size;
+} cube_t;
