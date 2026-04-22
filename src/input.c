@@ -10,7 +10,7 @@
 #define CAMERA_SPEED 1.5f
 #define MOUSE_SPEED -5.f
 
-#define GAME_KEY_INVENTORY KEY_ESCAPE
+#define GAME_KEY_INVENTORY KEY_TAB
 #define GAME_KEY_PAUSE KEY_P
 
 static bool last_frame_resized = true;

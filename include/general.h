@@ -1,22 +1,13 @@
 #pragma once
 
-#include "raylib.h"
-
-#include "dynamic_array.h"
-#include "render/render.h"
-#include "system/attributes.h"
 #include <stdbool.h>
 
-typedef struct {
-	Vector3 start, end;
-	Color color;
-} line_t;
+#include "raylib.h"
 
-typedef struct {
-	Vector3 center;
-	float radius;
-	Color color;
-} sphere_t;
+#include "shapes.h"
+#include "dynamic_array.h"
+#include "system/attributes.h"
+#include "system/player_info.h"
 
 typedef struct {
 	Vector3 center, size;
@@ -59,9 +50,15 @@ typedef struct {
 	} models;
 
 	da_create(line_t) lines;
+	da_create(Color) lines_colors;
+
 	da_create(sphere_t) spheres;
-	da_create(cube_t) cubes;
+	da_create(Color) spheres_colors;
+
 	da_create(ray_t) rays;
+	da_create(Color) rays_colors;
+
+	da_create(cube_t) cubes;
 	da_create(object_t) objects;
 
 	bool on_pause;

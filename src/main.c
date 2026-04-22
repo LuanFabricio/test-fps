@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "game.h"
 #include "object.h"
 #include "raylib.h"
 #include "raymath.h"
@@ -15,6 +16,7 @@
 #include "general.h"
 #include "input.h"
 #include "render/render.h"
+#include "shapes.h"
 #include "system/attributes.h"
 #include "ui/ui.h"
 
@@ -33,21 +35,25 @@ void setup(game_t *game)
 	game->models.cube = LoadModelFromMesh(GenMeshCube(1, 1, 1));
 
 	const float xyz_dist = 300;
-	da_append(&game->lines, ((line_t){
+
+
+	const line_t x_line = {
 		.start = {-xyz_dist, 0, 0},
 		.end = {xyz_dist, 0, 0},
-		.color = RED,
-	}));
-	da_append(&game->lines, ((line_t){
+	};
+	game_add_lines(game, x_line, RED);
+
+	const line_t y_line = {
 		.start = {0, -xyz_dist, 0},
 		.end = {0, xyz_dist, 0},
-		.color = GREEN,
-	}));
-	da_append(&game->lines, ((line_t){
+	};
+	game_add_lines(game, y_line, GREEN);
+
+	const line_t z_line = {
 		.start = {0, 0, -xyz_dist},
 		.end = {0, 0, xyz_dist},
-		.color = BLUE,
-	}));
+	};
+	game_add_lines(game, z_line, BLUE);
 
 	da_append(&game->cubes, ((cube_t){
 		.center = {0}, .size = (Vector3){0.5f, 0.5f, 0.5f},
@@ -59,11 +65,14 @@ void setup(game_t *game)
 		.color = ColorBrightness(WHITE, -0.5f),
 	}));
 
-	da_append(&game->spheres, ((sphere_t){
-		.center = {0, 1, 0},
-		.radius = PI / 16.f,
-		.color = PURPLE,
-	}));
+	game_add_sphere(
+		game,
+		(sphere_t){
+			.center = {0, 1, 0},
+			.radius = PI / 16.f,
+		},
+		PURPLE
+	);
 
 	da_append(
 		&game->objects,
@@ -167,12 +176,14 @@ static inline void draw(const game_t game)
 		ClearBackground(BLACK);
 		for (size_t i = 0; i < game.lines.size; i++) {
 			const line_t line = game.lines.items[i];
-			DrawLine3D(line.start, line.end, line.color);
+			const Color color = game.lines_colors.items[i];
+			DrawLine3D(line.start, line.end, color);
 		}
 
 		for (size_t i = 0; i < game.rays.size; i++) {
 			const ray_t ray = game.rays.items[i];
-			DrawLine3D(ray.line.start, ray.line.end, ray.line.color);
+			const Color color = game.rays_colors.items[i];
+			DrawLine3D(ray.line.start, ray.line.end, color);
 		}
 
 		for (size_t i = 0; i < game.cubes.size; i++) {
@@ -182,22 +193,26 @@ static inline void draw(const game_t game)
 
 		for (size_t i = 0; i < game.spheres.size; i++) {
 			const sphere_t sphere = game.spheres.items[i];
-			DrawSphere(sphere.center, sphere.radius, sphere.color);
+			const Color color = game.spheres_colors.items[i];
+			DrawSphere(sphere.center, sphere.radius, color);
 		}
 
 		for (size_t i = 0; i < game.objects.size; i++) {
 			const object_t object = game.objects.items[i];
 
+			const Vector3 vec_y = { 0, 1, 0 };
+			const float angle = 0;
 			DrawModelEx(
 				game.models.cube,
 				object.position,
-				(Vector3){0, 1, 0},
-				0,
+				vec_y,
+				angle,
 				object.size,
 				object.color);
 			DrawBoundingBox(object.hitbox.box, GREEN);
 		}
 
+		const Vector3 hand_item_scale = {0.25f, 0.25f, 0.25f};
 		DrawModelEx(
 			game.models.cube,
 			Vector3Add(
@@ -210,18 +225,21 @@ static inline void draw(const game_t game)
 			),
 			game.camera.up,
 			game.deg_rotation.x + 35.f,
-			(Vector3){0.25f, 0.25f, 0.25f},
+			hand_item_scale,
 			GREEN);
 	}
 
 	EndMode3D();
 
+	// NOTE: Maybe move to another place
+	const float cross_hair_radius = 2.5f;
 	DrawCircle(
 		game.screen.width / 2,
 		game.screen.height / 2,
-		2.5,
+		cross_hair_radius,
 		GREEN);
 
+	// TODO: Move to an module
 	const int font_size = 24;
 	const int x = 16;
 	int y = 16;
