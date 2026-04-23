@@ -3,6 +3,7 @@
 #include "raylib.h"
 
 void camera_setup(Camera* camera);
+void camera_set_position(Camera *camera, const Vector3 position);
 
 Vector3 camera_get_forward(const Camera* camera);
 Vector3 camera_get_right(const Camera* camera);

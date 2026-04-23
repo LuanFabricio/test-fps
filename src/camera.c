@@ -12,6 +12,13 @@ void camera_setup(Camera* camera)
 	camera->up = (Vector3){0, 1, 0};
 }
 
+void camera_set_position(Camera *camera, const Vector3 position)
+{
+	const Vector3 forward = camera_get_forward(camera);
+	camera->position = position;
+	camera->target = Vector3Add(position, forward);
+}
+
 Vector3 camera_get_forward(const Camera* camera)
 {
 	return Vector3Subtract(camera->target, camera->position);
