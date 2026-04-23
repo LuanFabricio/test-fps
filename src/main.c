@@ -8,166 +8,16 @@
 
 #include "game.h"
 #include "object.h"
+#include "physics/gravity.h"
 #include "raylib.h"
 #include "raymath.h"
 
 #include "camera.h"
-#include "dynamic_array.h"
 #include "general.h"
 #include "input.h"
 #include "render/render.h"
 #include "shapes.h"
-#include "system/attributes.h"
 #include "ui/ui.h"
-
-void setup(game_t *game)
-{
-	srand(time(NULL));
-
-	game->player.attributes.damage = 15.f;
-
-	game->cooldown = 0.166;
-	game->delay_to_next_shoot = 0;
-	game->screen.width = GetScreenWidth();
-	game->screen.height = GetScreenHeight();
-	camera_setup(&game->camera);
-
-	game->models.cube = LoadModelFromMesh(GenMeshCube(1, 1, 1));
-
-	const float xyz_dist = 300;
-
-
-	const line_t x_line = {
-		.start = {-xyz_dist, 0, 0},
-		.end = {xyz_dist, 0, 0},
-	};
-	game_add_lines(game, x_line, RED);
-
-	const line_t y_line = {
-		.start = {0, -xyz_dist, 0},
-		.end = {0, xyz_dist, 0},
-	};
-	game_add_lines(game, y_line, GREEN);
-
-	const line_t z_line = {
-		.start = {0, 0, -xyz_dist},
-		.end = {0, 0, xyz_dist},
-	};
-	game_add_lines(game, z_line, BLUE);
-
-	const cube_t cube1 = {
-		.center = {0},
-		.size = {0.5f, 0.5f, 0.5f},
-	};
-	game_add_cubes(game, cube1, YELLOW);
-
-	const cube_t cube2 = {
-		.center = {0, -10, 0},
-		.size = {200.f, 5.f, 200.f},
-	};
-	game_add_cubes(game, cube2, ColorBrightness(WHITE, -0.5f));
-
-	const sphere_t sphere = {
-		.center = {0, 1, 0},
-		.radius = PI / 16.f,
-	};
-	game_add_sphere(
-		game,
-		sphere,
-		PURPLE
-	);
-
-	da_append(
-		&game->objects,
-		object_create(
-			.position = { 8, 8, 8},
-			.size = { 2, 2, 2},
-			.hitbox_position = { 8, 8, 8},
-			.hitbox_size = { 2, 2, 2},
-			.color = PURPLE));
-}
-
-static inline void update_loop(game_t *game, const float delta_time)
-{
-	if (IsWindowResized()) {
-		printf("Window resized!\n");
-		game->screen.width = GetScreenWidth();
-		game->screen.height = GetScreenHeight();
-
-		ui_player_info_update_position(game->screen.width, game->screen.height);
-	}
-	if (game->on_pause) return;
-
-	const float angle = 10 * delta_time;
-	const float radians = angle * DEG2RAD;
-	const Vector3 rotate_vec = {0.5f, 0, 0.5f};
-
-	Vector3 *sphere_center = &game->spheres.items[0].center;
-	*sphere_center = Vector3RotateByAxisAngle(*sphere_center, rotate_vec, radians);
-
-	da_for(&game->rays, i) {
-		const ray_t ray = game->rays.items[i];
-		if (ray.death_time <= GetTime()) {
-			da_remove(&game->rays, i);
-			if (i > 0) i--;
-		}
-	}
-
-	da_for(&game->objects, i) {
-		object_t *obj = &game->objects.items[i];
-		const float speed = 1.5f;
-		const Vector3 move = Vector3Scale(
-			Vector3Normalize(
-				Vector3Subtract(
-					game->camera.position, obj->position)),
-			speed * delta_time
-		);
-		object_move_position(obj, move);
-	}
-
-	if (game->delay_to_next_shoot > 0) {
-		game->delay_to_next_shoot -= delta_time;
-	}
-
-	if (game->objects.size <= 5) {
-		const Vector3 position = {
-			.x = 30 - randf() * 15,
-			.y = 30 - randf() * 15,
-			.z = 30 - randf() * 15,
-		};
-		const Vector3 size = {
-			.x = 0.5f + randf() * 2,
-			.y = 0.5f + randf() * 2,
-			.z = 0.5f + randf() * 2,
-		};
-		da_append(
-			&game->objects,
-			object_create(
-				.position = position,
-				.size = size,
-				.hitbox_position = position,
-				.hitbox_size = size,
-				.color = (Color){
-					.r = randf() * 255,
-					.g = randf() * 255,
-					.b = randf() * 255,
-					.a = 255,
-				}
-			)
-		);
-		printf("game->objects.size = %lu\n", game->objects.size);
-	}
-
-	// while (game->player.attribute_points > 0) {
-	// 	player_info_spend_skill_upgrade(
-	// 		&game->player, rand() % ATTRIBUTE_LEN);
-	// }
-
-
-	if (game->show_upgrades) {
-		ui_player_info_update(&game->player);
-	}
-}
 
 static inline void draw(const game_t game)
 {
@@ -177,6 +27,9 @@ static inline void draw(const game_t game)
 
 	{
 		ClearBackground(BLACK);
+
+		DrawCubeV(game.floor.center, game.floor.size, ColorBrightness(WHITE, -0.5f));
+
 		for (size_t i = 0; i < game.lines.size; i++) {
 			const line_t line = game.lines.items[i];
 			const Color color = game.lines_colors.items[i];
@@ -308,7 +161,7 @@ int main(void)
 {
 	InitWindow(1280, 800, "Test fps");
 	game_t game = {0};
-	setup(&game);
+	game_setup(&game);
 
 	ui_player_info_setup(GetScreenWidth(), GetScreenHeight());
 
@@ -319,13 +172,11 @@ int main(void)
 	while(!WindowShouldClose()) {
 		draw(game);
 
-		const float delta_time = GetFrameTime();
-
-		update_loop(&game, delta_time);
+		game_update_loop(&game, GetFrameTime());
 
 		if (IsWindowFocused()) {
-			input_mouse_handler(&game, delta_time);
-			input_keyboard_handler(&game, delta_time);
+			input_mouse_handler(&game, GetFrameTime());
+			input_keyboard_handler(&game, GetFrameTime());
 		}
 	}
 
