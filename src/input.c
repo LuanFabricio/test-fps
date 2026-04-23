@@ -4,6 +4,7 @@
 #include "camera.h"
 #include <raylib.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "input.h"
 
@@ -15,22 +16,24 @@
 
 static bool last_frame_resized = true;
 
-inline static Vector3 get_move_vector()
+inline static Vector3 get_move_vector(const Camera* camera)
 {
 	Vector3 move_vector = {0};
 
+	const Vector3 right = camera_get_right(camera);
 	if (IsKeyDown(KEY_A)) {
-		move_vector.x += -1;
+		move_vector = Vector3Subtract(move_vector, right);
 	}
 	if (IsKeyDown(KEY_D)) {
-		move_vector.x += 1;
+		move_vector = Vector3Add(move_vector, right);
 	}
 
+	const Vector3 forward = camera_get_forward(camera);
 	if (IsKeyDown(KEY_W)) {
-		move_vector.z += 1;
+		move_vector = Vector3Add(move_vector, forward);
 	}
 	if (IsKeyDown(KEY_S)) {
-		move_vector.z += -1;
+		move_vector = Vector3Subtract(move_vector, forward);
 	}
 
 	if (IsKeyDown(KEY_SPACE)) {
@@ -51,14 +54,17 @@ inline static Vector3 get_move_vector()
 
 void input_keyboard_handler(game_t *game, const float delta_time)
 {
-	Vector3 move_vector = get_move_vector();
 	const float fixed_speed = CAMERA_SPEED * delta_time;
-	move_vector = Vector3Scale(move_vector, fixed_speed);
 
 	Camera *camera = &game->camera;
-	camera_move_right(camera, move_vector.x);
-	camera_move_up(camera, move_vector.y);
-	camera_move_forward(camera, move_vector.z);
+	Vector3 move_vector = get_move_vector(camera);
+	move_vector = Vector3Scale(move_vector, fixed_speed);
+
+	camera_set_position(camera, Vector3Add(camera->position, move_vector));
+
+	// camera_move_right(camera, move_vector.x);
+	// camera_move_up(camera, move_vector.y);
+	// camera_move_forward(camera, move_vector.z);
 
 	if (IsKeyPressed(GAME_KEY_INVENTORY)) {
 		game->show_upgrades = !game->show_upgrades;
