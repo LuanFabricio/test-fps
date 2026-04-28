@@ -5,9 +5,7 @@
 #include "raylib.h"
 
 #include "shapes.h"
-#include "dynamic_array.h"
 #include "system/attributes.h"
-#include "system/player_info.h"
 
 typedef struct {
 	line_t line;

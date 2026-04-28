@@ -138,17 +138,18 @@ static inline void draw(const game_t game)
 	y += font_size;
 	DrawText(
 		TextFormat(
-			"mouse: %f, %f",
-			mouse.x,
-			mouse.y),
+			"player_velocity: %f, %f, %f",
+			game.player_velocity.x,
+			game.player_velocity.y,
+			game.player_velocity.z),
 		x, y, font_size,
 		GREEN);
 
 
-	render_player_info(&game.player, (Vector2){ game.screen.width - 255, 16 });
+	render_player_info(&game.player_info, (Vector2){ game.screen.width - 255, 16 });
 
 	if (game.show_upgrades) {
-		ui_player_info_render(&game.player);
+		ui_player_info_render(&game.player_info);
 		// render_player_info_ui(
 		// 	&game.player,
 		// 	(Vector2){.x = game.screen.width, .y = game.screen.height });

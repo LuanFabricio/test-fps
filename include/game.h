@@ -2,10 +2,15 @@
 
 #include <raylib.h>
 
+#include "dynamic_array.h"
 #include "shapes.h"
 #include "general.h"
+#include "system/player_info.h"
 
-#define GAME_MIN_VELOCITY_Y 0.f
+#define GAME_MIN_VELOCITY_Y -150.f
+
+typedef da_create(object_t) objects_t;
+typedef da_create(Vector3) objects_velocity_t;
 
 typedef struct {
 	Camera camera;
@@ -19,7 +24,8 @@ typedef struct {
 		int width, height;
 	} screen;
 
-	player_info_t player;
+	player_info_t player_info;
+	Vector3 player_position;
 	Vector3 player_velocity;
 
 	struct {
@@ -38,7 +44,8 @@ typedef struct {
 	da_create(cube_t) cubes;
 	da_create(Color) cubes_colors;
 
-	da_create(object_t) objects;
+	objects_t objects;
+	objects_velocity_t objects_velocity;
 
 	bool on_pause;
 

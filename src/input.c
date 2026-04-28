@@ -1,14 +1,15 @@
-#include "general.h"
+#include <stdbool.h>
+
+#include "raylib.h"
 #include "raymath.h"
 
 #include "camera.h"
-#include <raylib.h>
-#include <stdbool.h>
-#include <stdio.h>
+#include "general.h"
 
 #include "input.h"
 
-#define CAMERA_SPEED 1.5f
+#define CAMERA_SPEED 2.5f
+#define CAMERA_SPRINT_MULTIPLIER 4.5f
 #define MOUSE_SPEED -5.f
 
 #define GAME_KEY_INVENTORY KEY_TAB
@@ -19,7 +20,6 @@ static bool last_frame_resized = true;
 inline static Vector3 get_move_vector(const Camera* camera)
 {
 	Vector3 move_vector = {0};
-
 	const Vector3 right = camera_get_right(camera);
 	if (IsKeyDown(KEY_A)) {
 		move_vector = Vector3Subtract(move_vector, right);
@@ -46,7 +46,8 @@ inline static Vector3 get_move_vector(const Camera* camera)
 	move_vector = Vector3Normalize(move_vector);
 
 	if (IsKeyDown(KEY_LEFT_SHIFT)) {
-		move_vector = Vector3Scale(move_vector, 4.5f);
+		move_vector.x = move_vector.x * CAMERA_SPRINT_MULTIPLIER;
+		move_vector.z = move_vector.z * CAMERA_SPRINT_MULTIPLIER;
 	}
 
 	return move_vector;
@@ -54,13 +55,14 @@ inline static Vector3 get_move_vector(const Camera* camera)
 
 void input_keyboard_handler(game_t *game, const float delta_time)
 {
-	const float fixed_speed = CAMERA_SPEED * delta_time;
-
 	Camera *camera = &game->camera;
-	Vector3 move_vector = get_move_vector(camera);
-	move_vector = Vector3Scale(move_vector, fixed_speed);
 
-	camera_set_position(camera, Vector3Add(camera->position, move_vector));
+	const float y_velocity = game->player_velocity.y;
+	game->player_velocity = get_move_vector(camera);
+	game->player_velocity.y += y_velocity;
+
+
+	// camera_set_position(camera, Vector3Add(camera->position, move_vector));
 
 	// camera_move_right(camera, move_vector.x);
 	// camera_move_up(camera, move_vector.y);
@@ -115,12 +117,12 @@ void input_mouse_handler(game_t *game, const float delta_time)
 			RayCollision ray_col = GetRayCollisionBox(ray, obj->hitbox.box);
 
 			if (ray_col.hit) {
-				obj->attributes.current_health -= game->player.attributes.damage;
+				obj->attributes.current_health -= game->player_info.attributes.damage;
 			}
 
 			if (obj->attributes.current_health <= 0) {
 				player_info_gain_xp(
-					&game->player,
+					&game->player_info,
 					obj->attributes.max_health + randf() * 100);
 
 				da_remove(&game->objects, i);
