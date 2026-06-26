@@ -25,7 +25,7 @@ typedef struct {
 	} screen;
 
 	player_info_t player_info;
-	Vector3 player_position;
+	cube_t player_collision;
 	Vector3 player_velocity;
 
 	struct {

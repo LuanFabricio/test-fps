@@ -7,8 +7,6 @@
 #include <time.h>
 
 #include "game.h"
-#include "object.h"
-#include "physics/gravity.h"
 #include "raylib.h"
 #include "raymath.h"
 

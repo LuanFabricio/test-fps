@@ -4,6 +4,7 @@
 #include "object.h"
 
 #include "game.h"
+#include "shapes.h"
 
 void game_setup(game_t *game)
 {
@@ -17,6 +18,10 @@ void game_setup(game_t *game)
 	game->screen.height = GetScreenHeight();
 	camera_setup(&game->camera);
 
+	game->player_collision = (cube_t){
+		.center = { 2, 0, 0, },
+		.size = { 0.5, 0.5, 0.5 }
+	};
 	game->models.cube = LoadModelFromMesh(GenMeshCube(1, 1, 1));
 
 	const float xyz_dist = 300;
@@ -45,7 +50,6 @@ void game_setup(game_t *game)
 		.size = {0.5f, 0.5f, 0.5f},
 	};
 	game_add_cubes(game, cube1, YELLOW);
-
 	const sphere_t sphere = {
 		.center = {0, 1, 0},
 		.radius = PI / 16.f,
@@ -59,15 +63,15 @@ void game_setup(game_t *game)
 	da_append(
 		&game->objects,
 		object_create(
-			.position = { 8, 8, 8},
-			.size = { 2, 2, 2},
-			.hitbox_position = { 8, 8, 8},
-			.hitbox_size = { 2, 2, 2},
+			.position = { 8, 8, 8 },
+			.size = { 2, 2, 2 },
+			.hitbox_position = { 8, 8, 8 },
+			.hitbox_size = { 2, 2, 2 },
 			.color = PURPLE));
 
 	const cube_t floor_cube = {
-		.center = {0, -5.f, 0},
-		.size = {200.f, 5.f, 200.f},
+		.center = {0, -20.f, 0},
+		.size = {200.f, 20.f, 200.f},
 	};
 	game->floor = floor_cube;
 }
