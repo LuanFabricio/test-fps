@@ -27,7 +27,7 @@ bool collision_check_cube(cube_t cube1, cube_t cube2)
 	const float y_max2 = cube2.center.y + half_cube2.y;
 	const float z_max2 = cube2.center.z + half_cube2.z;
 
-	return (x_min1 < x_max2 && x_min1 < x_max2)
+	return (x_min1 < x_max2 && x_min2 < x_max1)
 		&& (y_min1 < y_max2 && y_min2 < y_max1)
 		&& (z_min1 < z_max2 && z_min2 < z_max1);
 }
@@ -66,27 +66,22 @@ sphere_t collision_check_sphere_cube_step(const sphere_t sphere_start, const sph
 		printf("\tcurrent_step.radius: %f\n", current_step.radius);
 		printf("\tMove step: %f, %f, %f\n", move_step.x, move_step.y, move_step.z);
 
-		bool collided = false;
-
 		sphere_t future_step = current_step;
 		future_step.center.x +=  move_step.x;
 		if (collision_check_sphere_cube(future_step, cube)) {
 			current_step.center.x += move_step.x;
-			collided = true;
 		}
 
 		future_step = current_step;
 		future_step.center.y +=  move_step.y;
 		if (collision_check_sphere_cube(future_step, cube)) {
 			current_step.center.y += move_step.y;
-			collided = true;
 		}
 
 		future_step = current_step;
 		future_step.center.z +=  move_step.z;
 		if (collision_check_sphere_cube(future_step, cube)) {
 			current_step.center.z += move_step.z;
-			collided = true;
 		}
 	}
 

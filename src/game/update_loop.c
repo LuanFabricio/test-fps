@@ -3,6 +3,7 @@
 
 #include "camera.h"
 #include "dynamic_array.h"
+#include "macros/utils.h"
 #include "physics/collision.h"
 #include "physics/gravity.h"
 #include "raylib.h"
@@ -17,11 +18,11 @@ typedef enum {
 	AXIS_X,
 	AXIS_Y,
 	AXIS_Z,
+	AXIS_LEN,
 } axis_e;
 
 static void update_ui(game_t *game);
 static void update_entities_data(game_t *game, const float delta_time);
-static void update_position_by_velocity(Vector3 velocity, Vector3 *position, float delta_time);
 static void update_entities_position(game_t *game, const float delta_time);
 static void add_objects(objects_t *objects, objects_velocity_t *objects_velocity);
 static void resolve_axis_collision_cube(cube_t *cube, cube_t collided, const axis_e axis, const float diff);
@@ -34,11 +35,6 @@ inline void game_update_loop(game_t *game, const float delta_time)
 
 	update_entities_data(game, delta_time);
 	update_entities_position(game, delta_time);
-}
-
-static void update_position_by_velocity(Vector3 velocity, Vector3 *position, float delta_time)
-{
-	*position = Vector3Add(*position, Vector3Scale(velocity, delta_time));
 }
 
 static void update_entities_position(game_t *game, const float delta_time)
@@ -57,18 +53,19 @@ static void update_entities_position(game_t *game, const float delta_time)
 		object_move_position(obj, velocity);
 	}
 
-	const float radius = .1f;
-	const sphere_t start = {
-		.center = game->player_collision.center,
-		.radius = radius,
-	};
-	sphere_t end = {
-		.center = game->player_collision.center,
-		.radius = radius,
-	};
-	update_position_by_velocity(game->player_velocity, &end.center, delta_time);
-	const Vector3 diff = Vector3Subtract(start.center, end.center);
+	// const float radius = .1f;
+	// const sphere_t start = {
+	// 	.center = game->player_collision.center,
+	// 	.radius = radius,
+	// };
+	// sphere_t end = {
+	// 	.center = game->player_collision.center,
+	// 	.radius = radius,
+	// };
+	// update_position_by_velocity(game->player_velocity, &end.center, delta_time);
+	// const Vector3 diff = Vector3Subtract(start.center, end.center);
 
+	/*
 	da_for_each(&game->objects, object_t) {
 		const cube_t bounding_box = {
 			.center = loop.item->hitbox.position,
@@ -77,6 +74,7 @@ static void update_entities_position(game_t *game, const float delta_time)
 
 		// assert(!collision_check_sphere_cube_step(start, end, bounding_box, 10));
 	}
+	*/
 
 	cube_t player_collision = game->player_collision;
 
@@ -101,6 +99,8 @@ static void update_entities_position(game_t *game, const float delta_time)
 
 static void resolve_axis_collision_cube(cube_t *cube, cube_t collided, const axis_e axis, const float diff)
 {
+	assert(axis < AXIS_LEN);
+
 	if (diff == 0) return;
 	switch (axis) {
 		case AXIS_X: {
@@ -128,7 +128,7 @@ static void resolve_axis_collision_cube(cube_t *cube, cube_t collided, const axi
 				     }
 			     } break;
 		default:
-			     assert(false && "UNREACHEABLE");
+			     UNREACHABLE("Axis not found");
 	}
 }
 

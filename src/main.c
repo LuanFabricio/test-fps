@@ -132,7 +132,6 @@ static inline void draw(const game_t game)
 		x, y, font_size,
 		GREEN);
 
-	const Vector2 mouse = GetMousePosition();
 	y += font_size;
 	DrawText(
 		TextFormat(

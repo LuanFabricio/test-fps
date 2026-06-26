@@ -36,7 +36,7 @@ static ui_t player_ui =  {
 
 static Font font;
 
-#define append_format_text(text, attr)\
+#define append_format_text(text, attr, idx)\
 	do {\
 		current_size = MeasureTextEx(font, text, FONT_SIZE, font_spacing);\
 		da_append(&player_ui.texts, ((text_t){\
@@ -75,6 +75,7 @@ void ui_player_info_setup(const int screen_width, int screen_height)
 
 	Vector2 current_size;
 	int idx = 0;
+	(void)idx;
 	int x, y;
 
 	x = initial_x - rect_width / 2.f;
@@ -82,10 +83,10 @@ void ui_player_info_setup(const int screen_width, int screen_height)
 
 	// TODO: Create an internal function to append a
 	// template and a button, passing out the attributes_e
-	append_format_text("HP: %.02f/%.02f", ATTRIBUTE_HEALTH);
-	append_format_text("ARMR: %.4f", ATTRIBUTE_ARMOR);
-	append_format_text("DMG: %.4f", ATTRIBUTE_DAMAGE);
-	append_format_text("ELMNT: %.4f%%", ATTRIBUTE_ELEMENTAL_MULTIPLIER);
+	append_format_text("HP: %.02f/%.02f", ATTRIBUTE_HEALTH, idx);
+	append_format_text("ARMR: %.4f", ATTRIBUTE_ARMOR, idx);
+	append_format_text("DMG: %.4f", ATTRIBUTE_DAMAGE, idx);
+	append_format_text("ELMNT: %.4f%%", ATTRIBUTE_ELEMENTAL_MULTIPLIER, idx);
 
 	da_for_each(&player_ui.texts, text_t) {
 		da_append(&player_ui.buttons, ((button_t){
