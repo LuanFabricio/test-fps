@@ -24,7 +24,10 @@ typedef struct {
 		int width, height;
 	} screen;
 
+	// TODO: Move tha struct
 	player_info_t player_info;
+	int player_jumps_remaning;
+	int player_jumps_max;
 	cube_t player_collision;
 	Vector3 player_velocity;
 

@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "camera.h"
@@ -26,7 +27,7 @@ static void update_entities_data(game_t *game, const float delta_time);
 static void update_entities_position(game_t *game, const float delta_time);
 static void add_objects(objects_t *objects, objects_velocity_t *objects_velocity);
 static void resolve_axis_collision_cube(cube_t *cube, cube_t collided, const axis_e axis, const float diff);
-static void check_and_resolve_collision_cube(cube_t* cube, game_t* game, const axis_e axis, const float diff);
+static bool check_and_resolve_collision_cube(cube_t* cube, game_t* game, const axis_e axis, const float diff);
 
 inline void game_update_loop(game_t *game, const float delta_time)
 {
@@ -84,8 +85,14 @@ static void update_entities_position(game_t *game, const float delta_time)
 
 	speed = game->player_velocity.y * delta_time;
 	player_collision.center.y += speed;
-	check_and_resolve_collision_cube(&player_collision, game, AXIS_Y, speed);
-	if (collision_check_cube(player_collision, game->floor)) {
+	const bool is_player_falling = speed < 0;
+	if (check_and_resolve_collision_cube(&player_collision, game, AXIS_Y, speed) && is_player_falling) {
+		// NOTE: Maybe move to a function (player_reset_jump)
+		game->player_jumps_remaning = game->player_jumps_max;
+	} else if (collision_check_cube(player_collision, game->floor)) {
+		if (is_player_falling) {
+			game->player_jumps_remaning = game->player_jumps_max;
+		}
 		resolve_axis_collision_cube(&player_collision, game->floor, AXIS_Y, speed);
 	}
 
@@ -132,7 +139,7 @@ static void resolve_axis_collision_cube(cube_t *cube, cube_t collided, const axi
 	}
 }
 
-static void check_and_resolve_collision_cube(cube_t* cube, game_t* game, const axis_e axis, const float diff)
+static bool check_and_resolve_collision_cube(cube_t* cube, game_t* game, const axis_e axis, const float diff)
 {
 	da_for_each(&game->cubes, cube_t) {
 		// NOTE: Maybe return the point where collides, and use it to
@@ -143,9 +150,10 @@ static void check_and_resolve_collision_cube(cube_t* cube, game_t* game, const a
 			printf("%.4f, %.4f, %.4f (%.4f, %.4f, %.4f/%.4f)\n", cube->center.x, cube->center.y, cube->center.z, cube->size.x, cube->size.y, cube->size.z, diff);
 			printf("%p: %.4f, %.4f, %.4f (%.4f, %.4f, %.4f)\n", loop.item, loop.item->center.x, loop.item->center.y, loop.item->center.z, loop.item->size.x, loop.item->size.y, loop.item->size.z);
 			resolve_axis_collision_cube(cube, *loop.item, axis, diff);
-			break;
+			return true;
 		}
 	}
+	return false;
 }
 
 static void update_ui(game_t *game)

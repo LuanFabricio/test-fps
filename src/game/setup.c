@@ -20,8 +20,10 @@ void game_setup(game_t *game)
 
 	game->player_collision = (cube_t){
 		.center = { 2, 0, 0, },
-		.size = { 0.5, 0.5, 0.5 }
+		.size = { 0.5, 2.0, 0.5 }
 	};
+	game->player_jumps_remaning = 2;
+	game->player_jumps_max = 2;
 	game->models.cube = LoadModelFromMesh(GenMeshCube(1, 1, 1));
 
 	const float xyz_dist = 300;
