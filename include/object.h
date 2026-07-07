@@ -11,3 +11,4 @@ typedef struct {
 object_t _object_create(object_create_params params);
 #define object_create(...) _object_create((object_create_params) {__VA_ARGS__})
 void object_move_position(object_t *obj, const Vector3 move);
+void object_update_position(object_t *obj, const Vector3 position);
