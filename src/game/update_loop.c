@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "camera.h"
 #include "dynamic_array.h"
@@ -26,7 +27,8 @@ static void update_ui(game_t *game);
 static void update_entities_data(game_t *game, const float delta_time);
 static void update_entities_position(game_t *game, const float delta_time);
 static void add_objects(objects_t *objects, objects_velocity_t *objects_velocity);
-static void resolve_axis_collision_cube(cube_t *cube, cube_t collided, const axis_e axis, const float diff);
+static void entity_update_and_check_collision(cube_t *entity_collision, Vector3 axis_velocity, game_t* game, bool collided_axis[AXIS_LEN]);
+static void resolve_axis_collision_cube(cube_t *cube, const cube_t collided, const axis_e axis, const float diff);
 static bool check_and_resolve_collision_cube(cube_t* cube, game_t* game, const axis_e axis, const float diff);
 
 inline void game_update_loop(game_t *game, const float delta_time)
@@ -47,61 +49,50 @@ static void update_entities_position(game_t *game, const float delta_time)
 	Vector3 *sphere_center = &game->spheres.items[0].center;
 	*sphere_center = Vector3RotateByAxisAngle(*sphere_center, rotate_vec, radians);
 
+	cube_t collision;
+	Vector3 axis_velocity;
+	bool collided_axis[AXIS_LEN] = {false};
+
 	da_for(&game->objects, i) {
 		object_t *obj = &game->objects.items[i];
-		const Vector3 velocity = Vector3Scale(game->objects_velocity.items[i], delta_time);
 
-		object_move_position(obj, velocity);
+		// TODO: Update (add or change) collision attribute to cube_t
+		collision.center = obj->hitbox.position;
+		collision.size = obj->hitbox.size;
+		axis_velocity = Vector3Scale(game->objects_velocity.items[i], delta_time);
+		memset(collided_axis, false, sizeof(bool) * AXIS_LEN);
+		entity_update_and_check_collision(&collision, axis_velocity, game, collided_axis);
+		object_update_position(obj, collision.center);
 	}
 
-	// const float radius = .1f;
-	// const sphere_t start = {
-	// 	.center = game->player_collision.center,
-	// 	.radius = radius,
-	// };
-	// sphere_t end = {
-	// 	.center = game->player_collision.center,
-	// 	.radius = radius,
-	// };
-	// update_position_by_velocity(game->player_velocity, &end.center, delta_time);
-	// const Vector3 diff = Vector3Subtract(start.center, end.center);
-
-	/*
-	da_for_each(&game->objects, object_t) {
-		const cube_t bounding_box = {
-			.center = loop.item->hitbox.position,
-			.size = loop.item->hitbox.size,
-		};
-
-		// assert(!collision_check_sphere_cube_step(start, end, bounding_box, 10));
-	}
-	*/
-
-	cube_t player_collision = game->player_collision;
-
-	float speed = game->player_velocity.x * delta_time;
-	player_collision.center.x += speed;
-	check_and_resolve_collision_cube(&player_collision, game, AXIS_X, speed);
-
-	speed = game->player_velocity.y * delta_time;
-	player_collision.center.y += speed;
-	const bool is_player_falling = speed < 0;
-	if (check_and_resolve_collision_cube(&player_collision, game, AXIS_Y, speed) && is_player_falling) {
+	collision = game->player_collision;
+	axis_velocity = Vector3Scale(game->player_velocity, delta_time);
+	memset(collided_axis, false, sizeof(bool) * AXIS_LEN);
+	entity_update_and_check_collision(&collision, axis_velocity, game, collided_axis);
+	if (collided_axis[AXIS_Y]) {
 		// NOTE: Maybe move to a function (player_reset_jump)
 		game->player_jumps_remaning = game->player_jumps_max;
-	} else if (collision_check_cube(player_collision, game->floor)) {
-		if (is_player_falling) {
-			game->player_jumps_remaning = game->player_jumps_max;
-		}
-		resolve_axis_collision_cube(&player_collision, game->floor, AXIS_Y, speed);
 	}
 
-	speed = game->player_velocity.z * delta_time;
-	player_collision.center.z += speed;
-	check_and_resolve_collision_cube(&player_collision, game, AXIS_Z, speed);
-
-	game->player_collision.center = player_collision.center;
+	game->player_collision.center = collision.center;
 	camera_set_position(&game->camera, game->player_collision.center);
+}
+
+static void entity_update_and_check_collision(cube_t *entity_collision, const Vector3 axis_velocity, game_t* game, bool collided_axis[AXIS_LEN])
+{
+	entity_collision->center.x += axis_velocity.x;
+	collided_axis[AXIS_X] = check_and_resolve_collision_cube(entity_collision, game, AXIS_X, axis_velocity.x);
+
+	entity_collision->center.y += axis_velocity.y;
+	const bool is_player_falling = axis_velocity.y < 0;
+	collided_axis[AXIS_Y] = check_and_resolve_collision_cube(entity_collision, game, AXIS_Y, axis_velocity.y);
+	if (!collided_axis[AXIS_Y] && collision_check_cube(*entity_collision, game->floor)) {
+		resolve_axis_collision_cube(entity_collision, game->floor, AXIS_Y, axis_velocity.y);
+		collided_axis[AXIS_Y] = true;
+	}
+
+	entity_collision->center.z += axis_velocity.z;
+	collided_axis[AXIS_Z] = check_and_resolve_collision_cube(entity_collision, game, AXIS_Z, axis_velocity.z);
 }
 
 static void resolve_axis_collision_cube(cube_t *cube, cube_t collided, const axis_e axis, const float diff)
@@ -122,8 +113,7 @@ static void resolve_axis_collision_cube(cube_t *cube, cube_t collided, const axi
 				     const float y_dist = (cube->size.y + collided.size.y) / 2 + collided.center.y;
 				     if (diff > 0) {
 					     cube->center.y = -y_dist;
-				     } else {
-					     cube->center.y = y_dist;
+				     } else { cube->center.y = y_dist;
 				     }
 			     } break;
 		case AXIS_Z: {
