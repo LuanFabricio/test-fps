@@ -139,6 +139,8 @@ void input_mouse_handler(game_t *game, const float delta_time)
 				entity->attributes.current_health -= game->player_info.attributes.damage;
 			}
 
+			// NOTE: This check should be in another loop,
+			// maybe a `check_loop` function in `src/game/game_loop.c`
 			if (entity->attributes.current_health <= 0) {
 				player_info_gain_xp(
 					&game->player_info,
