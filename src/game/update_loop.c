@@ -12,7 +12,6 @@
 #include "raymath.h"
 
 #include "game.h"
-#include "object.h"
 #include "shapes.h"
 #include "ui/ui.h"
 

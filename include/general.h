@@ -5,7 +5,6 @@
 #include "raylib.h"
 
 #include "shapes.h"
-#include "system/attributes.h"
 
 typedef struct {
 	line_t line;
