@@ -5,12 +5,13 @@
 #include "dynamic_array.h"
 #include "shapes.h"
 #include "general.h"
+#include "entity.h"
 #include "system/player_info.h"
 
 #define GAME_MIN_VELOCITY_Y -150.f
 
-typedef da_create(object_t) objects_t;
-typedef da_create(Vector3) objects_velocity_t;
+typedef da_create(entity_t) entities_t;
+typedef da_create(Vector3) entities_velocity_t;
 
 typedef struct {
 	Camera camera;
@@ -47,8 +48,8 @@ typedef struct {
 	da_create(cube_t) cubes;
 	da_create(Color) cubes_colors;
 
-	objects_t objects;
-	objects_velocity_t objects_velocity;
+	entities_t entities;
+	entities_velocity_t entities_velocity;
 
 	bool on_pause;
 

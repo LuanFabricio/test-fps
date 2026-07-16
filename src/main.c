@@ -52,19 +52,24 @@ static inline void draw(const game_t game)
 			DrawSphere(sphere.center, sphere.radius, color);
 		}
 
-		for (size_t i = 0; i < game.objects.size; i++) {
-			const object_t object = game.objects.items[i];
+		for (size_t i = 0; i < game.entities.size; i++) {
+			const entity_t entity = game.entities.items[i];
 
 			const Vector3 vec_y = { 0, 1, 0 };
 			const float angle = 0;
 			DrawModelEx(
 				game.models.cube,
-				object.position,
+				entity.position,
 				vec_y,
 				angle,
-				object.size,
-				object.color);
-			DrawBoundingBox(object.hitbox.box, GREEN);
+				entity.size,
+				entity.color);
+			const Vector3 half_size = Vector3Scale(entity.hitbox.size, 0.5f);
+			const BoundingBox bounding_box = {
+				.min = Vector3Subtract(entity.hitbox.center, half_size),
+				.max = Vector3Add(entity.hitbox.center, half_size),
+			};
+			DrawBoundingBox(bounding_box, GREEN);
 		}
 
 		const Vector3 hand_item_scale = {0.25f, 0.25f, 0.25f};

@@ -1,6 +1,19 @@
 #pragma once
 
-#include "general.h"
+#include "raylib.h"
+
+#include "system/attributes.h"
+
+typedef struct {
+	Vector3 position;
+	Vector3 size;
+	Color color;
+	struct {
+		BoundingBox box;
+		Vector3 position, size;
+	} hitbox;
+	attributes_t attributes;
+} object_t;
 
 typedef struct {
 	Vector3 position, size;

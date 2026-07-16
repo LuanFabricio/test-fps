@@ -1,5 +1,7 @@
 #include <stdbool.h>
+#include <stdio.h>
 
+#include "entity.h"
 #include "macros/utils.h"
 #include "raylib.h"
 #include "raymath.h"
@@ -124,20 +126,25 @@ void input_mouse_handler(game_t *game, const float delta_time)
 		};
 
 		// TODO: Move to a specific module
-		da_for(&game->objects, i) {
-			object_t *obj = &game->objects.items[i];
-			RayCollision ray_col = GetRayCollisionBox(ray, obj->hitbox.box);
+		da_for(&game->entities, i) {
+			entity_t *entity = &game->entities.items[i];
+			const Vector3 half_size = Vector3Scale(entity->hitbox.size, 0.5f);
+			const BoundingBox bounding_box = {
+				.min = Vector3Subtract(entity->hitbox.center, half_size),
+				.max = Vector3Add(entity->hitbox.center, half_size),
+			};
+			RayCollision ray_col = GetRayCollisionBox(ray, bounding_box);
 
 			if (ray_col.hit) {
-				obj->attributes.current_health -= game->player_info.attributes.damage;
+				entity->attributes.current_health -= game->player_info.attributes.damage;
 			}
 
-			if (obj->attributes.current_health <= 0) {
+			if (entity->attributes.current_health <= 0) {
 				player_info_gain_xp(
 					&game->player_info,
-					obj->attributes.max_health + randf() * 100);
+					entity->attributes.max_health + randf() * 100);
 
-				da_remove(&game->objects, i);
+				da_remove(&game->entities, i);
 				if (i > 0) i--;
 			}
 		}

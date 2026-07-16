@@ -1,6 +1,7 @@
 #include <time.h>
 
 #include "camera.h"
+#include "entity.h"
 #include "object.h"
 
 #include "game.h"
@@ -63,13 +64,11 @@ void game_setup(game_t *game)
 	);
 
 	da_append(
-		&game->objects,
-		object_create(
-			.position = { 8, 8, 8 },
-			.size = { 2, 2, 2 },
-			.hitbox_position = { 8, 8, 8 },
-			.hitbox_size = { 2, 2, 2 },
-			.color = PURPLE));
+		&game->entities,
+		entity_create(
+			(Vector3){ 8, 8, 8 },
+			(Vector3){ 2, 2, 2 },
+			PURPLE));
 
 	const cube_t floor_cube = {
 		.center = {0, -20.f, 0},

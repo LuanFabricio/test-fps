@@ -13,16 +13,5 @@ typedef struct {
 	double death_time;
 } ray_t;
 
-typedef struct {
-	Vector3 position;
-	Vector3 size;
-	Color color;
-	struct {
-		BoundingBox box;
-		Vector3 position, size;
-	} hitbox;
-	attributes_t attributes;
-} object_t;
-
 
 float randf();
