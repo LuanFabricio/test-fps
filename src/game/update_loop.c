@@ -57,9 +57,7 @@ static void update_entities_position(game_t *game, const float delta_time)
 
 		collision = entity->hitbox;
 
-		axis_velocity = Vector3Scale(game->entities_velocity.items[i], delta_time);
-		// TODO: Move to update_entities_data
-		gravity_apply(&axis_velocity, delta_time);
+		axis_velocity = game->entities_velocity.items[i];
 		memset(collided_axis, false, sizeof(bool) * AXIS_LEN);
 		entity_update_and_check_collision(&collision, axis_velocity, game, collided_axis);
 		entity_update_position(entity, collision.center);
@@ -186,8 +184,9 @@ void update_entities_data(game_t *game, const float delta_time)
 			Vector3Normalize(
 				Vector3Subtract(
 					game->camera.position, entity->position)),
-			speed
+			speed * delta_time
 		);
+		gravity_apply(&game->entities_velocity.items[i], delta_time);
 	}
 
 	gravity_apply(&game->player_velocity, delta_time);
