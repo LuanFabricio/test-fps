@@ -175,11 +175,12 @@ int main(void)
 	while(!WindowShouldClose()) {
 		draw(game);
 
-		game_update_loop(&game, GetFrameTime());
+		const float frame_time = GetFrameTime();
+		game_update_loop(&game, frame_time);
 
 		if (IsWindowFocused()) {
-			input_mouse_handler(&game, GetFrameTime());
-			input_keyboard_handler(&game, GetFrameTime());
+			input_mouse_handler(&game, frame_time);
+			input_keyboard_handler(&game, frame_time);
 		}
 	}
 
