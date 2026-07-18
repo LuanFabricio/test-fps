@@ -1,5 +1,6 @@
 #include <stdbool.h>
-#include <stdio.h>
+#include <stdlib.h>
+#include <float.h>
 
 #include "entity.h"
 #include "macros/utils.h"
@@ -8,7 +9,6 @@
 
 #include "camera.h"
 #include "game.h"
-#include "general.h"
 
 #include "input.h"
 
@@ -126,6 +126,8 @@ void input_mouse_handler(game_t *game, const float delta_time)
 		};
 
 		// TODO: Move to a specific module
+		entity_t *nearest_entity = NULL;
+		float entity_distance = FLT_MAX;
 		da_for(&game->entities, i) {
 			entity_t *entity = &game->entities.items[i];
 			const Vector3 half_size = Vector3Scale(entity->hitbox.size, 0.5f);
@@ -135,20 +137,14 @@ void input_mouse_handler(game_t *game, const float delta_time)
 			};
 			RayCollision ray_col = GetRayCollisionBox(ray, bounding_box);
 
-			if (ray_col.hit) {
-				entity->attributes.current_health -= game->player_info.attributes.damage;
+			if (ray_col.hit && ray_col.distance < entity_distance) {
+				entity_distance = ray_col.distance;
+				nearest_entity = entity;
 			}
+		}
 
-			// NOTE: This check should be in another loop,
-			// maybe a `check_loop` function in `src/game/game_loop.c`
-			if (entity->attributes.current_health <= 0) {
-				player_info_gain_xp(
-					&game->player_info,
-					entity->attributes.max_health + randf() * 100);
-
-				da_remove(&game->entities, i);
-				if (i > 0) i--;
-			}
+		if (nearest_entity) {
+			nearest_entity->attributes.current_health -= game->player_info.attributes.damage;
 		}
 	}
 }

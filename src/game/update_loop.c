@@ -179,6 +179,17 @@ void update_entities_data(game_t *game, const float delta_time)
 
 	da_for(&game->entities, i) {
 		entity_t *entity = &game->entities.items[i];
+
+
+		if (entity->attributes.current_health <= 0) {
+			player_info_gain_xp(
+				&game->player_info,
+				entity->attributes.max_health + randf() * 100);
+
+			da_remove(&game->entities, i);
+			if (i > 0) i--;
+		}
+
 		const float speed = 1.5f;
 		game->entities_velocity.items[i] = Vector3Scale(
 			Vector3Normalize(
