@@ -2,17 +2,17 @@
 
 #include "raymath.h"
 
-entity_t entity_create(Vector3 position, Vector3 size, Color color)
+entity_t entity_create_params(entity_create_parameters_t params)
 {
 	return (entity_t){
-		.position = position,
-		.size = size,
+		.position = params.position,
+		.size = params.size,
 		.hitbox = {
-			.center = position,
-			.size = size,
+			.center = Vector3Add(params.position, params.hitbox_position_offset),
+			.size = Vector3Add(params.size, params.hitbox_size_offset),
 		},
-		.color = color,
-		.attributes = {314},
+		.color = params.color,
+		.attributes = params.attributes,
 	};
 }
 

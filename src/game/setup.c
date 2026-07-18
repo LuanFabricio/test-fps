@@ -66,9 +66,11 @@ void game_setup(game_t *game)
 	da_append(
 		&game->entities,
 		entity_create(
-			(Vector3){ 8, 8, 8 },
-			(Vector3){ 2, 2, 2 },
-			PURPLE));
+			.position = { 8, 8, 8 },
+			.size = { 2, 2, 2 },
+			.color = PURPLE,
+			.attributes = {10},
+		));
 
 	const cube_t floor_cube = {
 		.center = {0, -20.f, 0},

@@ -226,7 +226,12 @@ static void add_entities(entities_t *entities, entities_velocity_t *entities_vel
 
 	da_append(
 		entities,
-		entity_create(position, size, color));
+		entity_create(
+			.position = position,
+			.size = size,
+			.color = color,
+			.attributes = {10},
+		));
 	da_append(entities_velocity, Vector3Zero());
 	printf("entities.size = %lu\n", entities->size);
 }
