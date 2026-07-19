@@ -122,7 +122,6 @@ static inline void draw(const game_t game)
 		cross_hair_radius,
 		GREEN);
 
-	// TODO: Move to an module
 	const int font_size = 24;
 	const int x = 16;
 	int y = 16;
