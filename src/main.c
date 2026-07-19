@@ -19,6 +19,8 @@
 
 static inline void draw(const game_t game)
 {
+	const size_t entities_attribute_tex_len = game.entities.size;
+	Texture *entities_attribute_tex = malloc(sizeof(Texture) * entities_attribute_tex_len);
 	BeginDrawing();
 
 	BeginMode3D(game.camera);
@@ -70,6 +72,20 @@ static inline void draw(const game_t game)
 				.max = Vector3Add(entity.hitbox.center, half_size),
 			};
 			DrawBoundingBox(bounding_box, GREEN);
+
+			char buffer[0xff] = "";
+			snprintf(
+				buffer,
+				sizeof(buffer),
+				"HP: %.02f/%.02f",
+				entity.attributes.current_health,
+				entity.attributes.max_health);
+			Image img = ImageText(buffer, 16, WHITE);
+			entities_attribute_tex[i] = LoadTextureFromImage(img);
+			Vector3 billboard_position = entity.position;
+			billboard_position.y += entity.size.y;
+			DrawBillboard(game.camera, entities_attribute_tex[i], billboard_position, 1.f, WHITE);
+			UnloadImage(img);
 		}
 
 		const Vector3 hand_item_scale = {0.25f, 0.25f, 0.25f};
@@ -158,6 +174,11 @@ static inline void draw(const game_t game)
 	}
 
 	EndDrawing();
+
+	for (size_t i = 0; i < entities_attribute_tex_len; i++) {
+		UnloadTexture(entities_attribute_tex[i]);
+	}
+	free(entities_attribute_tex);
 }
 
 int main(void)
