@@ -6,10 +6,10 @@
 #include <string.h>
 #include <time.h>
 
-#include "game.h"
 #include "raylib.h"
 #include "raymath.h"
 
+#include "game.h"
 #include "camera.h"
 #include "general.h"
 #include "input.h"
