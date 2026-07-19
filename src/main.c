@@ -79,15 +79,19 @@ static inline void draw(const game_t game)
 			snprintf(
 				buffer,
 				sizeof(buffer),
-				"HP: %.02f/%.02f",
-				entity.attributes.current_health,
-				entity.attributes.max_health);
+				"HP: %.02f/%.02f\n"
+				"DMG: %.02f\n"
+				"ELM MUL: %.02f%%\n",
+				entity.attributes.current_health, entity.attributes.max_health,
+				entity.attributes.damage,
+				entity.attributes.elemental_multiplier);
 			Image img = ImageText(buffer, billboard_font_size, WHITE);
 			assert(i < entities_attribute_tex_len && "Access out of bounds on `entities_attribute_tex`");
 			entities_attribute_tex[i] = LoadTextureFromImage(img);
 			Vector3 billboard_position = entity.position;
 			billboard_position.y += entity.size.y;
-			DrawBillboard(game.camera, entities_attribute_tex[i], billboard_position, 1.f, WHITE);
+			const float billboard_scale = 1.f;
+			DrawBillboard(game.camera, entities_attribute_tex[i], billboard_position, billboard_scale, WHITE);
 			UnloadImage(img);
 		}
 
