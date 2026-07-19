@@ -128,51 +128,13 @@ static inline void draw(const game_t game)
 	int y = 16;
 
 	DrawFPS(x, y);
-
 	y += font_size;
-	DrawText(
-		TextFormat(
-			"x: %f / y: %f / z: %f",
-			game.camera.position.x,
-			game.camera.position.y,
-			game.camera.position.z),
-		x, y, font_size,
-		GREEN);
 
-	y += font_size;
-	DrawText(
-		TextFormat(
-			"up: %f, %f, %f",
-			game.camera.up.x,
-			game.camera.up.y,
-			game.camera.up.z),
-		x, y, font_size,
-		GREEN);
-
-	const Vector3 forward = camera_get_forward(&game.camera);
-	y += font_size;
-	DrawText(
-		TextFormat(
-			"forward: %f, %f, %f",
-			forward.x,
-			forward.y,
-			forward.z),
-		x, y, font_size,
-		GREEN);
-
-	y += font_size;
-	DrawText(
-		TextFormat(
-			"player_velocity: %f, %f, %f",
-			game.player_velocity.x,
-			game.player_velocity.y,
-			game.player_velocity.z),
-		x, y, font_size,
-		GREEN);
-
+	Vector2 info_position = { x, y };
+	info_position = ui_draw_camera_info(game.camera, font_size, info_position);
+	info_position = ui_draw_player_velocity(game.player_velocity, font_size, info_position);
 
 	render_player_info(&game.player_info, (Vector2){ game.screen.width - 255, 16 });
-
 	if (game.show_upgrades) {
 		ui_player_info_render(&game.player_info);
 		// render_player_info_ui(
