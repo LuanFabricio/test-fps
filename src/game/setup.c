@@ -2,7 +2,6 @@
 
 #include "camera.h"
 #include "entity.h"
-#include "object.h"
 
 #include "game.h"
 #include "shapes.h"
@@ -69,7 +68,10 @@ void game_setup(game_t *game)
 			.position = { 8, 8, 8 },
 			.size = { 2, 2, 2 },
 			.color = PURPLE,
-			.attributes = {10},
+			.attributes = {
+				.current_health = 10,
+				.max_health = 10,
+			},
 		));
 
 	const cube_t floor_cube = {
