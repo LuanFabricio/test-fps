@@ -74,13 +74,15 @@ static inline void draw(const game_t game)
 			DrawBoundingBox(bounding_box, GREEN);
 
 			char buffer[0xff] = "";
+			const int billboard_font_size = 16;
 			snprintf(
 				buffer,
 				sizeof(buffer),
 				"HP: %.02f/%.02f",
 				entity.attributes.current_health,
 				entity.attributes.max_health);
-			Image img = ImageText(buffer, 16, WHITE);
+			Image img = ImageText(buffer, billboard_font_size, WHITE);
+			assert(i < entities_attribute_tex_len && "Access out of bounds on `entities_attribute_tex`");
 			entities_attribute_tex[i] = LoadTextureFromImage(img);
 			Vector3 billboard_position = entity.position;
 			billboard_position.y += entity.size.y;
