@@ -23,3 +23,4 @@ typedef struct {
 #define ATTRIBUTES_BASE_INCREMENT 10.f
 
 void attributes_add(attributes_t* att1, const attributes_t att2);
+attributes_t attributes_gen_random(const float min_value, const float max_value);

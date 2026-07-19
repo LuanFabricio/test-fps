@@ -5,6 +5,7 @@
 
 #include "game.h"
 #include "shapes.h"
+#include "system/attributes.h"
 
 void game_setup(game_t *game)
 {
@@ -68,10 +69,7 @@ void game_setup(game_t *game)
 			.position = { 8, 8, 8 },
 			.size = { 2, 2, 2 },
 			.color = PURPLE,
-			.attributes = {
-				.current_health = 10,
-				.max_health = 10,
-			},
+			.attributes = attributes_gen_random(10, 250),
 		));
 
 	const cube_t floor_cube = {

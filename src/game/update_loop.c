@@ -230,10 +230,7 @@ static void add_entities(entities_t *entities, entities_velocity_t *entities_vel
 			.position = position,
 			.size = size,
 			.color = color,
-			.attributes = {
-				.current_health = 50,
-				.max_health = 50,
-			},
+			.attributes = attributes_gen_random(10, 250),
 		));
 	da_append(entities_velocity, Vector3Zero());
 	printf("entities.size = %lu\n", entities->size);
