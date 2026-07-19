@@ -11,7 +11,8 @@ void game_setup(game_t *game)
 {
 	srand(time(NULL));
 
-	game->player_info.attributes.damage = 15.f;
+	game->player_info.attributes = attributes_gen_random(10.f, 100.f);
+	game->player_info.attributes.damage = 20;
 
 	game->cooldown = 0.166;
 	game->delay_to_next_shoot = 0;
