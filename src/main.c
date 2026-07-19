@@ -19,6 +19,7 @@
 
 static inline void draw(const game_t game)
 {
+	// TODO: Check/test a better approach to handle billboards textures
 	const size_t entities_attribute_tex_len = game.entities.size;
 	Texture *entities_attribute_tex = malloc(sizeof(Texture) * entities_attribute_tex_len);
 	BeginDrawing();
