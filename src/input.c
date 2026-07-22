@@ -127,9 +127,10 @@ void input_mouse_handler(game_t *game, const float delta_time)
 
 		// TODO: Move to a specific module
 		entity_t *nearest_entity = NULL;
+		size_t nearest_entity_index = -1;
 		float entity_distance = FLT_MAX;
-		da_for(&game->entities, i) {
-			entity_t *entity = &game->entities.items[i];
+		da_for(&game->entities_data.entities, i) {
+			entity_t *entity = &game->entities_data.entities.items[i];
 			const Vector3 half_size = Vector3Scale(entity->hitbox.size, 0.5f);
 			const BoundingBox bounding_box = {
 				.min = Vector3Subtract(entity->hitbox.center, half_size),
@@ -140,11 +141,13 @@ void input_mouse_handler(game_t *game, const float delta_time)
 			if (ray_col.hit && ray_col.distance < entity_distance) {
 				entity_distance = ray_col.distance;
 				nearest_entity = entity;
+				nearest_entity_index = i;
 			}
 		}
 
 		if (nearest_entity) {
 			nearest_entity->attributes.current_health -= game->player_info.attributes.damage;
+			entities_data_update_billboard_texture(&game->entities_data, nearest_entity_index);
 		}
 	}
 }

@@ -1,3 +1,4 @@
+#include <raymath.h>
 #include <time.h>
 
 #include "camera.h"
@@ -64,14 +65,15 @@ void game_setup(game_t *game)
 		PURPLE
 	);
 
-	da_append(
-		&game->entities,
+	entities_data_append(
+		&game->entities_data,
 		entity_create(
 			.position = { 8, 8, 8 },
 			.size = { 2, 2, 2 },
 			.color = PURPLE,
 			.attributes = attributes_gen_random(10, 250),
-		));
+		),
+		Vector3Zero());
 
 	const cube_t floor_cube = {
 		.center = {0, -20.f, 0},

@@ -10,9 +10,6 @@
 
 #define GAME_MIN_VELOCITY_Y -150.f
 
-typedef da_create(entity_t) entities_t;
-typedef da_create(Vector3) entities_velocity_t;
-
 typedef struct {
 	Camera camera;
 
@@ -25,7 +22,7 @@ typedef struct {
 		int width, height;
 	} screen;
 
-	// TODO: Move tha struct
+	// TODO: Move that struct
 	player_info_t player_info;
 	int player_jumps_remaning;
 	int player_jumps_max;
@@ -48,8 +45,7 @@ typedef struct {
 	da_create(cube_t) cubes;
 	da_create(Color) cubes_colors;
 
-	entities_t entities;
-	entities_velocity_t entities_velocity;
+	entities_data_t entities_data;
 
 	bool on_pause;
 

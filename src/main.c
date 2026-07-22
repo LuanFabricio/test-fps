@@ -19,9 +19,6 @@
 
 static inline void draw(const game_t game)
 {
-	// TODO: Check/test a better approach to handle billboards textures
-	const size_t entities_attribute_tex_len = game.entities.size;
-	Texture *entities_attribute_tex = malloc(sizeof(Texture) * entities_attribute_tex_len);
 	BeginDrawing();
 
 	BeginMode3D(game.camera);
@@ -55,8 +52,8 @@ static inline void draw(const game_t game)
 			DrawSphere(sphere.center, sphere.radius, color);
 		}
 
-		for (size_t i = 0; i < game.entities.size; i++) {
-			const entity_t entity = game.entities.items[i];
+		for (size_t i = 0; i < game.entities_data.entities.size; i++) {
+			const entity_t entity = game.entities_data.entities.items[i];
 
 			const Vector3 vec_y = { 0, 1, 0 };
 			const float angle = 0;
@@ -73,26 +70,10 @@ static inline void draw(const game_t game)
 				.max = Vector3Add(entity.hitbox.center, half_size),
 			};
 			DrawBoundingBox(bounding_box, GREEN);
-
-			char buffer[0xff] = "";
-			const int billboard_font_size = 16;
-			snprintf(
-				buffer,
-				sizeof(buffer),
-				"HP: %.02f/%.02f\n"
-				"DMG: %.02f\n"
-				"ELM MUL: %.02f%%\n",
-				entity.attributes.current_health, entity.attributes.max_health,
-				entity.attributes.damage,
-				entity.attributes.elemental_multiplier);
-			Image img = ImageText(buffer, billboard_font_size, WHITE);
-			assert(i < entities_attribute_tex_len && "Access out of bounds on `entities_attribute_tex`");
-			entities_attribute_tex[i] = LoadTextureFromImage(img);
 			Vector3 billboard_position = entity.position;
 			billboard_position.y += entity.size.y;
 			const float billboard_scale = 1.f;
-			DrawBillboard(game.camera, entities_attribute_tex[i], billboard_position, billboard_scale, WHITE);
-			UnloadImage(img);
+			DrawBillboard(game.camera, game.entities_data.billboard_textures.items[i], billboard_position, billboard_scale, WHITE);
 		}
 
 		const Vector3 hand_item_scale = {0.25f, 0.25f, 0.25f};
@@ -142,11 +123,6 @@ static inline void draw(const game_t game)
 	}
 
 	EndDrawing();
-
-	for (size_t i = 0; i < entities_attribute_tex_len; i++) {
-		UnloadTexture(entities_attribute_tex[i]);
-	}
-	free(entities_attribute_tex);
 }
 
 int main(void)

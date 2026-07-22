@@ -5,6 +5,7 @@
 
 #include "camera.h"
 #include "dynamic_array.h"
+#include "entity.h"
 #include "macros/utils.h"
 #include "physics/collision.h"
 #include "physics/gravity.h"
@@ -25,7 +26,7 @@ typedef enum {
 static void update_ui(game_t *game);
 static void update_entities_data(game_t *game, const float delta_time);
 static void update_entities_position(game_t *game, const float delta_time);
-static void add_entities(entities_t *entities, entities_velocity_t *entities_velocity);
+static void add_entities(entities_data_t *data);
 static void entity_update_and_check_collision(cube_t *entity_collision, Vector3 axis_velocity, game_t* game, bool collided_axis[AXIS_LEN]);
 static void resolve_axis_collision_cube(cube_t *cube, const cube_t collided, const axis_e axis, const float diff);
 static bool check_and_resolve_collision_cube(cube_t* cube, game_t* game, const axis_e axis, const float diff);
@@ -52,12 +53,12 @@ static void update_entities_position(game_t *game, const float delta_time)
 	Vector3 axis_velocity;
 	bool collided_axis[AXIS_LEN] = {false};
 
-	da_for(&game->entities, i) {
-		entity_t *entity = &game->entities.items[i];
+	da_for(&game->entities_data.entities, i) {
+		entity_t *entity = &game->entities_data.entities.items[i];
 
 		collision = entity->hitbox;
 
-		axis_velocity = game->entities_velocity.items[i];
+		axis_velocity = game->entities_data.velocity.items[i];
 		memset(collided_axis, false, sizeof(bool) * AXIS_LEN);
 		entity_update_and_check_collision(&collision, axis_velocity, game, collided_axis);
 		entity_update_position(entity, collision.center);
@@ -173,12 +174,12 @@ void update_entities_data(game_t *game, const float delta_time)
 		game->delay_to_next_shoot -= delta_time;
 	}
 
-	if (game->entities.size <= 5) {
-		add_entities(&game->entities, &game->entities_velocity);
+	if (game->entities_data.entities.size <= 5) {
+		add_entities(&game->entities_data);
 	}
 
-	da_for(&game->entities, i) {
-		entity_t *entity = &game->entities.items[i];
+	da_for(&game->entities_data.entities, i) {
+		entity_t *entity = &game->entities_data.entities.items[i];
 
 
 		if (entity->attributes.current_health <= 0) {
@@ -186,24 +187,24 @@ void update_entities_data(game_t *game, const float delta_time)
 				&game->player_info,
 				entity->attributes.max_health + randf() * 100);
 
-			da_remove(&game->entities, i);
+			entities_data_remove(&game->entities_data, i);
 			if (i > 0) i--;
 		}
 
 		const float speed = 1.5f;
-		game->entities_velocity.items[i] = Vector3Scale(
+		game->entities_data.velocity.items[i] = Vector3Scale(
 			Vector3Normalize(
 				Vector3Subtract(
 					game->camera.position, entity->position)),
 			speed * delta_time
 		);
-		gravity_apply(&game->entities_velocity.items[i], delta_time);
+		gravity_apply(&game->entities_data.velocity.items[i], delta_time);
 	}
 
 	gravity_apply(&game->player_velocity, delta_time);
 }
 
-static void add_entities(entities_t *entities, entities_velocity_t *entities_velocity)
+static void add_entities(entities_data_t *data)
 {
 	const Vector3 position = {
 		.x = 30 - randf() * 15,
@@ -224,14 +225,14 @@ static void add_entities(entities_t *entities, entities_velocity_t *entities_vel
 		.a = 255,
 	};
 
-	da_append(
-		entities,
+	entities_data_append(
+		data,
 		entity_create(
 			.position = position,
 			.size = size,
 			.color = color,
 			.attributes = attributes_gen_random(10, 250),
-		));
-	da_append(entities_velocity, Vector3Zero());
-	printf("entities.size = %lu\n", entities->size);
+		),
+		Vector3Zero());
+	printf("entities.size = %lu\n", data->entities.size);
 }
