@@ -54,12 +54,11 @@ static void update_entities_position(game_t *game, const float delta_time)
 	Vector3 axis_velocity;
 	bool collided_axis[AXIS_LEN] = {false};
 
-	da_for(&game->entities_data.entities, i) {
-		entity_t *entity = &game->entities_data.entities.items[i];
-
+	for (size_t i = 0; i < game->entities_data.size; i++) {
+		entity_t *entity = &game->entities_data.entities[i];
 		collision = entity->hitbox;
 
-		axis_velocity = game->entities_data.velocity.items[i];
+		axis_velocity = game->entities_data.velocity[i];
 		memset(collided_axis, false, sizeof(bool) * AXIS_LEN);
 		entity_update_and_check_collision(&collision, axis_velocity, game, collided_axis);
 		entity_update_position(entity, collision.center);
@@ -186,13 +185,12 @@ void update_entities_data(game_t *game, const float delta_time)
 		game->delay_to_next_shoot -= delta_time;
 	}
 
-	if (game->entities_data.entities.size <= 5) {
+	if (game->entities_data.size <= 5) {
 		add_entities(&game->entities_data);
 	}
 
-	da_for(&game->entities_data.entities, i) {
-		entity_t *entity = &game->entities_data.entities.items[i];
-
+	for (size_t i = 0; i < game->entities_data.size; i++) {
+		entity_t *entity = &game->entities_data.entities[i];
 
 		if (entity->attributes.current_health <= 0) {
 			player_info_gain_xp(
@@ -204,13 +202,13 @@ void update_entities_data(game_t *game, const float delta_time)
 		}
 
 		const float speed = 1.5f;
-		game->entities_data.velocity.items[i] = Vector3Scale(
+		game->entities_data.velocity[i] = Vector3Scale(
 			Vector3Normalize(
 				Vector3Subtract(
 					game->camera.position, entity->position)),
 			speed * delta_time
 		);
-		gravity_apply(&game->entities_data.velocity.items[i], delta_time);
+		gravity_apply(&game->entities_data.velocity[i], delta_time);
 	}
 
 	gravity_apply(&game->player_velocity, delta_time);
@@ -246,5 +244,5 @@ static void add_entities(entities_data_t *data)
 			.attributes = attributes_gen_random(10, 250),
 		),
 		Vector3Zero());
-	printf("entities.size = %lu\n", data->entities.size);
+	printf("entities.size = %lu\n", data->size);
 }

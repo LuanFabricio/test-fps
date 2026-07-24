@@ -52,8 +52,8 @@ static inline void draw(const game_t game)
 			DrawSphere(sphere.center, sphere.radius, color);
 		}
 
-		for (size_t i = 0; i < game.entities_data.entities.size; i++) {
-			const entity_t entity = game.entities_data.entities.items[i];
+		for (size_t i = 0; i < game.entities_data.size; i++) {
+			const entity_t entity = game.entities_data.entities[i];
 
 			const Vector3 vec_y = { 0, 1, 0 };
 			const float angle = 0;
@@ -73,7 +73,7 @@ static inline void draw(const game_t game)
 			Vector3 billboard_position = entity.position;
 			billboard_position.y += entity.size.y;
 			const float billboard_scale = 1.f;
-			DrawBillboard(game.camera, game.entities_data.billboard_textures.items[i], billboard_position, billboard_scale, WHITE);
+			DrawBillboard(game.camera, game.entities_data.billboard_textures[i], billboard_position, billboard_scale, WHITE);
 		}
 
 		const Vector3 hand_item_scale = {0.25f, 0.25f, 0.25f};

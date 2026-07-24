@@ -129,8 +129,8 @@ void input_mouse_handler(game_t *game, const float delta_time)
 		entity_t *nearest_entity = NULL;
 		size_t nearest_entity_index = -1;
 		float entity_distance = FLT_MAX;
-		da_for(&game->entities_data.entities, i) {
-			entity_t *entity = &game->entities_data.entities.items[i];
+		for (size_t i = 0; i < game->entities_data.size; i++) {
+			entity_t *entity = &game->entities_data.entities[i];
 			const Vector3 half_size = Vector3Scale(entity->hitbox.size, 0.5f);
 			const BoundingBox bounding_box = {
 				.min = Vector3Subtract(entity->hitbox.center, half_size),
