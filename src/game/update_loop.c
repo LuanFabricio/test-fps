@@ -6,6 +6,7 @@
 #include "camera.h"
 #include "dynamic_array.h"
 #include "entity.h"
+#include "log.h"
 #include "macros/utils.h"
 #include "physics/collision.h"
 #include "physics/gravity.h"
@@ -132,11 +133,22 @@ static bool check_and_resolve_collision_cube(cube_t* cube, game_t* game, const a
 	da_for_each(&game->cubes, cube_t) {
 		// NOTE: Maybe return the point where collides, and use it to
 		// revert the postion with the move direction
-
-
 		if (collision_check_cube(*cube, *loop.item)) {
-			printf("%.4f, %.4f, %.4f (%.4f, %.4f, %.4f/%.4f)\n", cube->center.x, cube->center.y, cube->center.z, cube->size.x, cube->size.y, cube->size.z, diff);
-			printf("%p: %.4f, %.4f, %.4f (%.4f, %.4f, %.4f)\n", loop.item, loop.item->center.x, loop.item->center.y, loop.item->center.z, loop.item->size.x, loop.item->size.y, loop.item->size.z);
+			log_format(
+				stdout, LOG_LABEL_INFO,
+				"\nCollided cube:\n"
+				"\tcenter: %.4f, %.4f, %.4f\n"
+				"\tsize: %.4f, %.4f, %.4f\n",
+				cube->center.x, cube->center.y, cube->center.z,
+				cube->size.x, cube->size.y, cube->size.z);
+			log_format(
+				stdout, LOG_LABEL_INFO,
+				"\nCollided item(%p):\n"
+				"\tcenter: %.4f, %.4f, %.4f\n"
+				"\tsize: %.4f, %.4f, %.4f\n",
+				loop.item,
+				loop.item->center.x, loop.item->center.y, loop.item->center.z,
+				loop.item->size.x, loop.item->size.y, loop.item->size.z);
 			resolve_axis_collision_cube(cube, *loop.item, axis, diff);
 			return true;
 		}
